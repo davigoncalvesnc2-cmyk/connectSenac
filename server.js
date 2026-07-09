@@ -2,6 +2,7 @@
 require('dotenv').config(); // Carrega as variáveis do arquivo .env
 const express = require('express');
 const cors = require('cors');
+const db = require('./backend/config/database');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
