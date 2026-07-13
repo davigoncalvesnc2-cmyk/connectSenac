@@ -8,6 +8,8 @@ const authMiddleware = require('../middlewares/authMiddleware');
 router.use(authMiddleware);
 
 router.post('/', agendamentoController.criar);
+// Adicione esta linha junto das outras rotas (pode ser logo abaixo do router.get('/meus', ...))
+router.get('/admin/todos', agendamentoController.listarTodos);
 router.put('/:id/cancelar', agendamentoController.cancelar);
 router.get('/meus', agendamentoController.listarMeus);
 

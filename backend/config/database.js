@@ -1,10 +1,10 @@
 // backend/config/database.js
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
-
+ 
 // Define o caminho onde o arquivo do banco será salvo (dentro da pasta config)
 const dbPath = path.resolve(__dirname, 'database.sqlite');
-
+ 
 // Inicia a conexão com o banco de dados
 const db = new sqlite3.Database(dbPath, (err) => {
     if (err) {
@@ -14,7 +14,7 @@ const db = new sqlite3.Database(dbPath, (err) => {
         criarTabelas(); // Executa a criação das tabelas assim que conectar
     }
 });
-
+ 
 // Função responsável por estruturar nosso banco de dados
 function criarTabelas(){
     // 1. Tabela de Usuários (Foco nas regras da LGPD)
@@ -30,8 +30,8 @@ function criarTabelas(){
             criado_em DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     `);
-
-    // 2. Tabela de Serviços (Ofertados pela instituição)
+ 
+    // 2. Tabela de Serviços
     db.run(`
         CREATE TABLE IF NOT EXISTS servicos (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -39,8 +39,18 @@ function criarTabelas(){
             descricao TEXT,
             duracao_minutos INTEGER NOT NULL
         )
-    `);
-
+    `, () => {
+        // Seeding: Popula os serviços iniciais automaticamente caso não existam
+        db.get("SELECT COUNT(*) as count FROM servicos", (err, row) => {
+            if (row && row.count === 0) {
+                db.run("INSERT INTO servicos (id, nome, duracao_minutos) VALUES (1, 'Corte de Cabelo (Modelo)', 60)");
+                db.run("INSERT INTO servicos (id, nome, duracao_minutos) VALUES (2, 'Maquilhagem Artística', 90)");
+                db.run("INSERT INTO servicos (id, nome, duracao_minutos) VALUES (3, 'Manicure e Pedicure', 60)");
+                console.log('Serviços iniciais inseridos com sucesso.');
+            }
+        });
+    });
+ 
     // 3. Tabela de Agendamentos (O coração das regras de negócio)
     db.run(`
         CREATE TABLE IF NOT EXISTS agendamentos (
@@ -54,9 +64,9 @@ function criarTabelas(){
             FOREIGN KEY (servico_id) REFERENCES servicos (id) ON DELETE CASCADE
         )
     `);
-
+ 
     console.log('Tabelas sincronizadas com sucesso.');
 }
-
+ 
 // Exporta o banco para ser usado nos Models depois
 module.exports = db;
