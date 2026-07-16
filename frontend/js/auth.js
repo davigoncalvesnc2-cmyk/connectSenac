@@ -80,3 +80,73 @@
             }
         });
     }
+// Adicionar ao final do frontend/js/auth.js
+
+// Lógica de Solicitar Recuperação
+const formEsqueci = document.getElementById('formEsqueci');
+if (formEsqueci) {
+    formEsqueci.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const msgDiv = document.getElementById('msgRecuperacao');
+        const email = document.getElementById('emailRecuperacao').value;
+
+        msgDiv.innerHTML = '<span class="text-primary">A processar...</span>';
+
+        try {
+            const response = await fetch(`${API_URL}/esqueci-senha`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
+            const data = await response.json();
+            msgDiv.innerHTML = `<span class="text-success">${data.mensagem}</span>`;
+            // DICA PARA TESTE LOCAL: O link será impresso no terminal do VS Code onde roda o Node!
+        } catch (error) {
+            msgDiv.innerHTML = '<span class="text-danger">Erro de conexão.</span>';
+        }
+    });
+}
+
+// Lógica de Redefinir Senha
+const formRedefinir = document.getElementById('formRedefinir');
+if (formRedefinir) {
+    formRedefinir.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const msgDiv = document.getElementById('msgRedefinir');
+        const nova_senha = document.getElementById('novaSenha').value;
+        const confirmar_senha = document.getElementById('confirmarNovaSenha').value;
+
+        // Capturar o token da URL (ex: ?token=abc123xyz)
+        const params = new URLSearchParams(window.location.search);
+        const token = params.get('token');
+
+        if (!token) {
+            msgDiv.innerHTML = '<span class="text-danger">Link de recuperação inválido (Token ausente).</span>';
+            return;
+        }
+
+        if (nova_senha !== confirmar_senha) {
+            msgDiv.innerHTML = '<span class="text-danger">As palavras-passe não coincidem.</span>';
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_URL}/redefinir-senha`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token, nova_senha, confirmar_senha })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                msgDiv.innerHTML = `<span class="text-success">${data.mensagem} A redirecionar...</span>`;
+                setTimeout(() => window.location.href = 'index.html', 3000);
+            } else {
+                msgDiv.innerHTML = `<span class="text-danger">${data.erro}</span>`;
+            }
+        } catch (error) {
+            msgDiv.innerHTML = '<span class="text-danger">Erro de conexão.</span>';
+        }
+    });
+}

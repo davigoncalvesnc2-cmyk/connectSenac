@@ -2,14 +2,25 @@
 const express = require('express');
 const router = express.Router();
 const agendamentoController = require('../controllers/agendamentoController');
+
 const authMiddleware = require('../middlewares/authMiddleware');
+const autorizarPerfis = require('../middlewares/rbacMiddleware');
 
-// Ao colocar o middleware aqui, protegemos TODAS as rotas abaixo dele
-router.use(authMiddleware);
+// ----------------------------------------------------------------------
+// Rotas do Candidato (Qualquer utilizador autenticado)
+// ----------------------------------------------------------------------
+router.post('/', authMiddleware, agendamentoController.criar);
+router.get('/meus', authMiddleware, agendamentoController.listarMeus);
+router.put('/:id/cancelar', authMiddleware, agendamentoController.cancelar);
 
-router.post('/', agendamentoController.criar);
-router.put('/:id/cancelar', agendamentoController.cancelar);
-router.get('/meus', agendamentoController.listarMeus);
-router.get('/admin/todos', agendamentoController.listarTodos);
+// ----------------------------------------------------------------------
+// Rotas Administrativas (Apenas Admin e Coordenador)
+// ----------------------------------------------------------------------
+router.put(
+    '/admin/:id/cancelar',
+    authMiddleware,
+    autorizarPerfis('admin', 'coordenador'), // Apenas a chefia pode usar este atalho
+    agendamentoController.adminCancelar
+);
 
 module.exports = router;
