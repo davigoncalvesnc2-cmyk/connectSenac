@@ -141,7 +141,7 @@ exports.solicitarRecuperacao = async (req, res) => {
 
         // 5. Simular o envio de E-mail (No mundo real, usaríamos o Nodemailer aqui)
         // Como o Front-end e Back-end dividem a mesma origem, montamos o link dinamicamente
-        const linkRecuperacao = `${req.protocol}://${req.get('host')}/redefinir-senha.html?token=${resetToken}`;
+        const linkRecuperacao = `${req.protocol}://${req.get('host')}/definirSenha.html?token=${resetToken}`;
 
         console.log(`\n📧 [SIMULAÇÃO DE E-MAIL]`);
         console.log(`Para: ${email}`);

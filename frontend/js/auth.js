@@ -29,8 +29,19 @@
                 if (response.ok) {
                     // Guarda o Token JWT no navegador para as próximas requisições
                     localStorage.setItem('token', data.token);
-                    // Redireciona para o painel do utilizador
-                    window.location.href = 'painel.html';
+                    if (data.utilizador) {
+                        localStorage.setItem('usuario', JSON.stringify(data.utilizador));
+                    }
+
+                    // Redireciona para o painel correspondente ao perfil
+                    const perfil = data.utilizador?.perfil;
+                    if (perfil === 'admin' || perfil === 'coordenador') {
+                        window.location.href = 'admin.html';
+                    } else if (perfil === 'profissional') {
+                        window.location.href = 'profissional.html';
+                    } else {
+                        window.location.href = 'painel.html';
+                    }
                 } else {
                     msgErro.textContent = data.erro;
                     msgErro.classList.remove('d-none');
@@ -51,6 +62,7 @@
             const email = document.getElementById('email').value;
             const telefone = document.getElementById('telefone').value;
             const senha = document.getElementById('senha').value;
+            const confirmar_senha = document.getElementById('confirmar_senha').value;
 
             // Transformamos o 'checked' em 1 ou 0 para o banco de dados
             const consentimento_termos = document.getElementById('termoUso').checked ? 1 : 0;
@@ -62,7 +74,7 @@
                 const response = await fetch(`${API_URL}/registrar`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ nome, email, telefone, senha, consentimento_termos, consentimento_imagem })
+                    body: JSON.stringify({ nome, email, telefone, senha, confirmar_senha, consentimento_termos, consentimento_imagem })
                 });
 
                 const data = await response.json();

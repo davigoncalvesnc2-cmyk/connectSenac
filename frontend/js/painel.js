@@ -2,18 +2,41 @@
 
 const FALLBACK_BASE_URL = 'http://localhost:3000/api';
 const API_URL = window.location.protocol === 'file:' ? FALLBACK_BASE_URL : `${window.location.origin}/api`;
-const modalFeedback = new bootstrap.Modal(document.getElementById('modalFeedback')); // NOVA LINHA
 
 const token = localStorage.getItem('token');
-if (!token) window.location.href = 'index.html';
+if (!token) {
+    window.location.href = 'index.html';
+}
+
+// Descodificar o JWT para verificar o perfil e exibir o nome do usuário
+let payloadToken = null;
+try {
+    payloadToken = JSON.parse(atob(token.split('.')[1]));
+    // Redireciona caso um professor ou admin acesse a área exclusiva de candidatos
+    if (payloadToken.perfil === 'admin' || payloadToken.perfil === 'coordenador') {
+        window.location.href = 'admin.html';
+    } else if (payloadToken.perfil === 'profissional') {
+        window.location.href = 'profissional.html';
+    }
+
+    const elUserNome = document.getElementById('userNome');
+    if (elUserNome) {
+        const usuarioLocal = localStorage.getItem('usuario') ? JSON.parse(localStorage.getItem('usuario')) : null;
+        elUserNome.textContent = usuarioLocal?.nome || payloadToken.email.split('@')[0];
+    }
+} catch (e) {
+    console.error('Erro ao ler token:', e);
+}
 
 document.getElementById('btnSair').addEventListener('click', () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('usuario');
     window.location.href = 'index.html';
 });
 
-// Instância do Modal do Bootstrap para controlo via JS
+// Instâncias dos Modais do Bootstrap
 const modalAgendamento = new bootstrap.Modal(document.getElementById('modalAgendamento'));
+const modalFeedback = new bootstrap.Modal(document.getElementById('modalFeedback'));
 
 // ==========================================
 // 1. CARREGAR A VITRINE DE CURSOS
@@ -34,14 +57,16 @@ async function carregarCursos(){
 
         cursos.forEach(curso => {
             const profNome = curso.usuarios ? curso.usuarios.nome : 'A definir';
+            const local = curso.localizacao ? `<div class="text-muted small mb-2"><i class="bi bi-geo-alt"></i> ${curso.localizacao}</div>` : '';
             const card = `
                 <div class="col-md-6 col-lg-4">
                     <div class="card shadow-sm h-100 card-curso">
-                        <div class="card-body">
+                        <div class="card-body d-flex flex-column">
                             <h5 class="card-title fw-bold text-dark">${curso.nome}</h5>
                             <h6 class="card-subtitle mb-2 text-muted small">Prof. ${profNome}</h6>
-                            <p class="card-text small text-secondary mt-3">${curso.descricao.substring(0, 80)}...</p>
-                            <button class="btn btn-outline-primary btn-sm w-100 fw-bold" onclick="abrirModalAgendamento('${curso.id}', '${curso.nome}', '${curso.descricao}')">Ver Horários</button>
+                            ${local}
+                            <p class="card-text small text-secondary mt-2 flex-grow-1">${curso.descricao}</p>
+                            <button class="btn btn-outline-primary btn-sm w-100 fw-bold mt-3" onclick="abrirModalAgendamento('${curso.id}', '${curso.nome.replace(/'/g, "\\'")}', '${curso.descricao.replace(/'/g, "\\'")}')">Ver Horários</button>
                         </div>
                     </div>
                 </div>
@@ -64,7 +89,6 @@ async function abrirModalAgendamento(cursoId, cursoNome, cursoDescricao){
     const select = document.getElementById('selectHorarios');
     select.innerHTML = '<option value="" disabled selected>A procurar horários...</option>';
 
-    // Configura o botão de confirmar para saber qual curso estamos a tratar
     const btnConfirmar = document.getElementById('btnConfirmarAgendamento');
     btnConfirmar.onclick = () => realizarAgendamento(select.value);
 
@@ -88,7 +112,7 @@ async function abrirModalAgendamento(cursoId, cursoNome, cursoDescricao){
         horarios.forEach(h => {
             const dataFormatada = new Date(h.data_hora).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
             const vagasLivres = h.vagas_totais - h.vagas_ocupadas;
-            select.innerHTML += `<option value="${h.id}">${dataFormatada} (${vagasLivres} vagas)</option>`;
+            select.innerHTML += `<option value="${h.id}">${dataFormatada} (${vagasLivres} vagas livres)</option>`;
         });
     } catch (error) {
         select.innerHTML = '<option value="" disabled selected>Erro ao carregar horários.</option>';
@@ -114,7 +138,7 @@ async function realizarAgendamento(disponibilidadeId){
 
         if (response.ok) {
             msgDiv.innerHTML = `<span class="text-success">Agendamento concluído!</span>`;
-            carregarMeusAgendamentos(); // Atualiza a lista automaticamente
+            carregarMeusAgendamentos();
             setTimeout(() => modalAgendamento.hide(), 1500);
         } else {
             msgDiv.innerHTML = `<span class="text-danger">${data.erro}</span>`;
@@ -142,31 +166,39 @@ async function carregarMeusAgendamentos(){
         }
 
         agendamentos.forEach(ag => {
-            const cursoNome = ag.disponibilidades.cursos.nome;
-            const dataHora = new Date(ag.disponibilidades.data_hora).toLocaleString('pt-BR');
+            const cursoNome = ag.disponibilidades?.cursos?.nome || 'Curso';
+            const dataHora = ag.disponibilidades?.data_hora 
+                ? new Date(ag.disponibilidades.data_hora).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })
+                : 'Data a definir';
+            
             let badge = '';
-            let btnCancelar = '';
+            let btnAcao = '';
 
             if (ag.status === 'agendado') {
                 badge = '<span class="badge bg-primary">Confirmado</span>';
-                btnCancelar = `<button class="btn btn-sm btn-outline-danger mt-2 w-100" onclick="cancelarAgendamento('${ag.id}')">Cancelar</button>`;
+                btnAcao = `<button class="btn btn-sm btn-outline-danger mt-2 w-100" onclick="cancelarAgendamento('${ag.id}')">Cancelar Agendamento</button>`;
             } else if (ag.status === 'cancelado') {
                 badge = '<span class="badge bg-danger">Cancelado</span>';
             } else {
                 badge = '<span class="badge bg-success">Concluído</span>';
+                btnAcao = `<button class="btn btn-sm btn-outline-success mt-2 w-100" onclick="abrirModalFeedback('${ag.id}')">⭐ Avaliar Atendimento</button>`;
             }
 
             const card = `
                 <div class="col-12 col-md-6 col-xl-4">
-                    <div class="card shadow-sm border-0 bg-white">
-                        <div class="card-body p-3">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span class="fw-bold text-dark">${cursoNome}</span>
-                                ${badge}
+                    <div class="card shadow-sm border-0 bg-white h-100">
+                        <div class="card-body p-3 d-flex flex-column justify-content-between">
+                            <div>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="fw-bold text-dark">${cursoNome}</span>
+                                    ${badge}
+                                </div>
+                                <div class="text-secondary small mb-2"><i class="bi bi-calendar"></i> ${dataHora}</div>
                             </div>
-                            <div class="text-secondary small mb-2"><i class="bi bi-calendar"></i> ${dataHora}</div>
-                            ${btnCancelar}
-                            <div id="msg-canc-${ag.id}" class="small text-center mt-1"></div>
+                            <div>
+                                ${btnAcao}
+                                <div id="msg-canc-${ag.id}" class="small text-center mt-1"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -191,7 +223,7 @@ async function cancelarAgendamento(agendamentoId){
         const data = await response.json();
 
         if (response.ok) {
-            carregarMeusAgendamentos(); // Recarrega a lista para mostrar o novo status
+            carregarMeusAgendamentos();
         } else {
             msgDiv.innerHTML = `<span class="text-danger fw-bold">${data.erro}</span>`;
         }
@@ -201,11 +233,11 @@ async function cancelarAgendamento(agendamentoId){
 }
 
 // ==========================================
-// MÓDULO DE FEEDBACK
+// 4. MÓDULO DE FEEDBACK
 // ==========================================
 function abrirModalFeedback(agendamentoId){
     document.getElementById('feedbackAgendamentoId').value = agendamentoId;
-    document.getElementById('feedbackNota').value = '5'; // Padrão 5 estrelas
+    document.getElementById('feedbackNota').value = '5';
     document.getElementById('feedbackComentario').value = '';
     document.getElementById('msgFeedback').innerHTML = '';
     modalFeedback.show();
@@ -240,9 +272,7 @@ if (formFeedback) {
                 msgDiv.innerHTML = `<span class="text-success">${data.mensagem}</span>`;
                 setTimeout(() => {
                     modalFeedback.hide();
-                    // Opcional: Aqui podíamos atualizar a UI para esconder o botão de avaliar,
-                    // mas por agora o backend já bloqueia duplicações de forma segura.
-                }, 2000);
+                }, 1500);
             } else {
                 msgDiv.innerHTML = `<span class="text-danger">${data.erro}</span>`;
             }
@@ -252,6 +282,6 @@ if (formFeedback) {
     });
 }
 
-// Inicializa a página carregando tudo
+// Inicializa a página carregando dados
 carregarCursos();
 carregarMeusAgendamentos();

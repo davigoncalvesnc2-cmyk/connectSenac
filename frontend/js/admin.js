@@ -4,21 +4,41 @@ const FALLBACK_BASE_URL = 'http://localhost:3000/api';
 const API_URL = window.location.protocol === 'file:' ? FALLBACK_BASE_URL : `${window.location.origin}/api`;
 
 const token = localStorage.getItem('token');
-if (!token) window.location.href = 'index.html';
+if (!token) {
+    window.location.href = 'index.html';
+}
 
-// Descodificar o JWT para saber o nome e perfil do Admin conectado
-const payloadToken = JSON.parse(atob(token.split('.')[1]));
-document.getElementById('userNome').textContent = payloadToken.email.split('@')[0];
-document.getElementById('userPerfil').textContent = payloadToken.perfil.toUpperCase();
+let payloadToken = null;
+try {
+    // Descodificar o JWT para saber o nome e perfil do Admin conectado
+    payloadToken = JSON.parse(atob(token.split('.')[1]));
+    
+    // RBAC Guard: Apenas admin e coordenador podem acessar
+    if (payloadToken.perfil !== 'admin' && payloadToken.perfil !== 'coordenador') {
+        if (payloadToken.perfil === 'profissional') {
+            window.location.href = 'profissional.html';
+        } else {
+            window.location.href = 'painel.html';
+        }
+    }
+
+    const usuarioLocal = localStorage.getItem('usuario') ? JSON.parse(localStorage.getItem('usuario')) : null;
+    document.getElementById('userNome').textContent = usuarioLocal?.nome || payloadToken.email.split('@')[0];
+    document.getElementById('userPerfil').textContent = payloadToken.perfil.toUpperCase();
+} catch (e) {
+    console.error('Erro ao ler token:', e);
+    window.location.href = 'index.html';
+}
 
 // Se o utilizador for Coordenador, ocultamos a Tab de criar novos colaboradores (RBAC)
-if (payloadToken.perfil === 'coordenador') {
+if (payloadToken?.perfil === 'coordenador') {
     const equipaTab = document.getElementById('equipa-tab');
     if (equipaTab) equipaTab.style.display = 'none';
 }
 
 document.getElementById('btnSair').addEventListener('click', () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('usuario');
     window.location.href = 'index.html';
 });
 
@@ -299,7 +319,7 @@ async function carregarProfissionaisNoSelect() {
     }
 }
 
-async function excluirUsuario(id, nome){
+async function excluirUsuario(id, nome) {
     if (!confirm(`ATENÇÃO: Tem certeza absoluta que deseja remover a conta de ${nome}? Todos os seus agendamentos serão excluídos.`)) return;
 
     try {
@@ -318,6 +338,162 @@ async function excluirUsuario(id, nome){
     } catch (error) {
         alert("Erro na conexão com o servidor.");
     }
+}
+// Instância do Modal de Edição (Adicione no topo junto às outras variáveis)
+let modalEditarCursoInstance = null;
+
+// Esperar o DOM carregar para instanciar o Modal
+document.addEventListener("DOMContentLoaded", () => {
+    const modalEl = document.getElementById('modalEditarCurso');
+    if (modalEl) modalEditarCursoInstance = new bootstrap.Modal(modalEl);
+
+    // Iniciar carregamentos
+    carregarCursosAdmin();
+});
+
+// ==========================================
+// 1. ATUALIZAR A CRIAÇÃO DE CURSOS
+// ==========================================
+// Procure o seu 'formCurso.addEventListener' e atualize o payload para incluir os novos campos:
+/*
+    const payload = {
+        // ... (mantenha os campos existentes)
+        foto_url: document.getElementById('fotoCurso').value,
+        localizacao: document.getElementById('localCurso').value,
+        profissional_id: document.getElementById('selectProfissional').value
+    };
+*/
+
+// ==========================================
+// 2. LISTAR CURSOS NA TABELA DE GESTÃO
+// ==========================================
+async function carregarCursosAdmin() {
+    const tbody = document.getElementById('tabelaCursosBody');
+    if (!tbody) return;
+
+    try {
+        const response = await fetch(`${API_URL}/cursos/admin`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const cursos = await response.json();
+
+        tbody.innerHTML = '';
+        if (cursos.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Nenhum curso cadastrado.</td></tr>';
+            return;
+        }
+
+        cursos.forEach(curso => {
+            const profNome = curso.usuarios ? curso.usuarios.nome : 'Sem Professor';
+            const statusBadge = curso.status === 'ativo'
+                ? '<span class="badge bg-success">Ativo</span>'
+                : '<span class="badge bg-secondary">Arquivado</span>';
+
+            // O arquivamento é um Soft Delete. Só mostramos o botão se estiver ativo.
+            const btnArquivar = curso.status === 'ativo'
+                ? `<button class="btn btn-sm btn-outline-danger ms-1" onclick="arquivarCurso('${curso.id}', '${curso.nome}')">Arquivar</button>`
+                : '';
+
+            const row = `
+                <tr>
+                    <td>
+                        <div class="fw-bold text-dark">${curso.nome}</div>
+                        <div class="small text-muted text-truncate" style="max-width: 200px;">${curso.descricao}</div>
+                    </td>
+                    <td>${profNome}</td>
+                    <td class="small">${curso.localizacao || '-'}</td>
+                    <td>${statusBadge}</td>
+                    <td class="text-end">
+                        <button class="btn btn-sm btn-outline-primary" onclick='abrirModalEdicao(${JSON.stringify(curso).replace(/'/g, "&#39;")})'>Editar</button>
+                        ${btnArquivar}
+                    </td>
+                </tr>
+            `;
+            tbody.innerHTML += row;
+        });
+    } catch (error) {
+        tbody.innerHTML = '<tr><td colspan="5" class="text-danger text-center">Erro ao carregar catálogo.</td></tr>';
+    }
+}
+
+// ==========================================
+// 3. EDITAR E ARQUIVAR CURSOS
+// ==========================================
+async function arquivarCurso(id, nome) {
+    if (!confirm(`Deseja arquivar o curso "${nome}"? Ele sairá da vitrine dos alunos, mas o histórico será mantido.`)) return;
+
+    try {
+        const response = await fetch(`${API_URL}/cursos/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (response.ok) {
+            carregarCursosAdmin(); // Atualiza a tabela
+            carregarCursosNoSelect(); // Atualiza os selects de formulários
+        } else {
+            alert('Erro ao arquivar curso.');
+        }
+    } catch (error) {
+        alert('Erro de conexão.');
+    }
+}
+
+function abrirModalEdicao(curso) {
+    document.getElementById('editCursoId').value = curso.id;
+    document.getElementById('editNome').value = curso.nome;
+    document.getElementById('editDescricao').value = curso.descricao;
+    document.getElementById('editLocal').value = curso.localizacao;
+    document.getElementById('editFoto').value = curso.foto_url || '';
+
+    // Copiar opções do select de profissionais principal para o select do modal
+    const selectPrincipal = document.getElementById('selectProfissional');
+    const selectEdit = document.getElementById('editProfissional');
+    selectEdit.innerHTML = selectPrincipal.innerHTML;
+    selectEdit.value = curso.profissional_id;
+
+    document.getElementById('msgEditCurso').innerHTML = '';
+    modalEditarCursoInstance.show();
+}
+
+const formEditarCurso = document.getElementById('formEditarCurso');
+if (formEditarCurso) {
+    formEditarCurso.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = document.getElementById('editCursoId').value;
+        const msgDiv = document.getElementById('msgEditCurso');
+        msgDiv.innerHTML = '<span class="text-primary">A atualizar...</span>';
+
+        const payload = {
+            nome: document.getElementById('editNome').value,
+            descricao: document.getElementById('editDescricao').value,
+            localizacao: document.getElementById('editLocal').value,
+            foto_url: document.getElementById('editFoto').value,
+            profissional_id: document.getElementById('editProfissional').value
+        };
+
+        try {
+            const response = await fetch(`${API_URL}/cursos/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                msgDiv.innerHTML = '<span class="text-success">Atualizado com sucesso!</span>';
+                carregarCursosAdmin();
+                carregarCursosNoSelect();
+                setTimeout(() => modalEditarCursoInstance.hide(), 1500);
+            } else {
+                msgDiv.innerHTML = '<span class="text-danger">Erro ao atualizar.</span>';
+            }
+        } catch (error) {
+            msgDiv.innerHTML = '<span class="text-danger">Erro de conexão.</span>';
+        }
+    });
 }
 // Chame essa função na inicialização do arquivo (no final do admin.js)
 carregarProfissionaisNoSelect();

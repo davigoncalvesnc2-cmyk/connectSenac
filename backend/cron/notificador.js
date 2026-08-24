@@ -46,10 +46,11 @@ cron.schedule('* * * * *', async () => {
             }
 
             const dataCurso = new Date(ag.disponibilidades.data_hora);
-            const diferencaEmMinutos = Math.floor((dataCurso - agora) / (1000 * 60));
+            // Notifica se faltar aproximadamente 24h (~1440 min) ou 3h (~180 min)
+            const is24Horas = diferencaEmMinutos >= 1439 && diferencaEmMinutos <= 1441;
+            const is3Horas = diferencaEmMinutos >= 179 && diferencaEmMinutos <= 181;
 
-            // Só envia se faltarem exatas 24h (1440 min) ou 3h (180 min)
-            if (diferencaEmMinutos === 1440 || diferencaEmMinutos === 180) {
+            if (is24Horas || is3Horas) {
                 // Outra trava de segurança para garantir que o curso e o usuário existem
                 const curso = ag.disponibilidades.cursos?.nome || 'Curso não identificado';
                 const cliente = ag.usuarios?.nome || 'Aluno';
