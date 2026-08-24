@@ -1,73 +1,121 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connect Senac - Meu Painel</title>
+    <title>Connect Senac - Painel do Modelo</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f4f7f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .navbar-brand { font-weight: 700; letter-spacing: 0.5px; }
+        .card-curso { border: none; border-radius: 12px; transition: transform 0.2s; }
+        .card-curso:hover { transform: translateY(-5px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important; }
+        .btn-brand { background-color: #004a8d; color: white; border-radius: 8px; font-weight: 600; }
+        .btn-brand:hover { background-color: #003366; color: white; }
+        .section-title { color: #004a8d; font-weight: 700; border-bottom: 2px solid #004a8d; padding-bottom: 0.5rem; margin-bottom: 1.5rem; }</style>
 </head>
-<body class="bg-light">
+<body>
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+    <nav class="navbar navbar-expand-lg navbar-dark shadow-sm" style="background-color: #004a8d;">
         <div class="container">
-            <span class="navbar-brand">Connect Senac</span>
-            <button class="btn btn-danger btn-sm" onclick="terminarSessao()">Sair</button>
+            <a class="navbar-brand" href="#">Connect Senac <span class="badge bg-light text-dark ms-2">Área do Modelo</span></a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link active" href="#vitrine">Cursos & Vagas</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#meus-agendamentos">Meus Agendamentos</a></li>
+                </ul>
+                <div class="d-flex align-items-center gap-3 mt-2 mt-lg-0">
+                    <span class="text-white small">Olá, <strong id="userNome">Modelo</strong></span>
+                    <button class="btn btn-outline-light btn-sm" id="btnSair">Sair</button>
+                </div>
+            </div>
         </div>
     </nav>
 
-    <div class="container">
-        <div class="row">
-            <div class="col-md-5 mb-4">
-                <div class="card shadow-sm">
-                    <div class="card-body">
-                        <h5 class="card-title text-primary mb-3">Agendar Serviço</h5>
-                        <form id="formAgendamento">
-                            <div class="mb-3">
-                                <label for="servico" class="form-label">Serviço Desejado</label>
-                                <select class="form-select" id="servico" required>
-                                    <option value="" disabled selected>Selecione um serviço...</option>
-                                    <option value="1">Corte de Cabelo (Modelo)</option>
-                                    <option value="2">Maquiagem Artística</option>
-                                    <option value="3">Manicure e Pedicure</option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label for="dataHora" class="form-label">Data e Hora</label>
-                                <input type="datetime-local" class="form-control" id="dataHora" required>
-                            </div>
+    <div class="container py-5">
 
-                            <div id="msgAgendamento" class="mb-2"></div>
+        <h4 class="section-title" id="meus-agendamentos">📅 Os Meus Agendamentos</h4>
+        <div id="listaMeusAgendamentos" class="row g-3 mb-5">
+            <div class="text-center text-muted">A carregar os seus agendamentos...</div>
+        </div>
 
-                            <button type="submit" class="btn btn-success w-100">Confirmar Agendamento</button>
-                        </form>
-                    </div>
+        <h4 class="section-title" id="vitrine">✨ Cursos Disponíveis para Modelos</h4>
+        <div id="listaCursos" class="row g-4">
+            <div class="text-center text-muted">A carregar o catálogo de serviços...</div>
+        </div>
+
+    </div>
+
+    <!-- Modal de Agendamento -->
+    <div class="modal fade" id="modalAgendamento" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header border-bottom-0 pb-0">
+                    <h5 class="modal-title fw-bold" id="modalCursoNome">Escolher Horário</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-            </div>
-
-            <div class="col-md-7">
-                <div class="card shadow-sm">
-                    <div class="card-body">
-                        <h5 class="card-title text-primary mb-3">Meus Agendamentos</h5>
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Data/Hora</th>
-                                        <th>Serviço</th>
-                                        <th>Estado</th>
-                                        <th>Ação</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tabelaAgendamentos">
-                                    </tbody>
-                            </table>
-                        </div>
+                <div class="modal-body">
+                    <p class="small text-muted mb-3" id="modalCursoDescricao"></p>
+                    <div class="form-floating mb-3">
+                        <select class="form-select" id="selectHorarios">
+                            <option value="" disabled selected>A procurar horários...</option>
+                        </select>
+                        <label for="selectHorarios">Horários Disponíveis</label>
                     </div>
+                    <div id="msgAgendamento" class="text-center small fw-bold mb-2"></div>
+                </div>
+                <div class="modal-footer border-top-0 pt-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-brand" id="btnConfirmarAgendamento">Confirmar Presença</button>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Modal de Feedback -->
+    <div class="modal fade" id="modalFeedback" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header border-bottom-0 pb-0">
+                    <h5 class="modal-title fw-bold text-primary">⭐ Avaliar Serviço</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="small text-muted mb-3">Como foi a sua experiência? A sua opinião ajuda os nossos alunos a evoluírem!</p>
+
+                    <form id="formFeedback">
+                        <input type="hidden" id="feedbackAgendamentoId">
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Nota (1 a 5 estrelas)</label>
+                            <select class="form-select" id="feedbackNota" required>
+                                <option value="5">⭐⭐⭐⭐⭐ (5) - Excelente</option>
+                                <option value="4">⭐⭐⭐⭐ (4) - Muito Bom</option>
+                                <option value="3">⭐⭐⭐ (3) - Bom</option>
+                                <option value="2">⭐⭐ (2) - Regular</option>
+                                <option value="1">⭐ (1) - Ruim</option>
+                            </select>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <textarea class="form-control" id="feedbackComentario" style="height: 100px" placeholder="Deixe um comentário"></textarea>
+                            <label for="feedbackComentario">Comentário (Opcional)</label>
+                        </div>
+
+                        <div id="msgFeedback" class="text-center small fw-bold mb-2"></div>
+
+                        <button type="submit" class="btn btn-success w-100 fw-bold">Enviar Avaliação</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+       
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
     <script src="js/painel.js"></script>
 </body>
 </html>

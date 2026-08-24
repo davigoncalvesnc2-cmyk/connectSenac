@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar Nova Palavra-passe</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="d-flex align-items-center bg-light vh-100">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-4">
+                <div class="card shadow-lg border-0 rounded-4 p-4">
+                    <h4 class="fw-bold text-center mb-4" style="color: #004a8d;">Nova Palavra-passe</h4>
+                    <form id="formRedefinir">
+                        <div class="form-floating mb-3">
+                            <input type="password" class="form-control" id="novaSenha" placeholder="Nova Senha" required>
+                            <label for="novaSenha">Nova Palavra-passe</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="password" class="form-control" id="confirmarNovaSenha" placeholder="Confirmar Senha" required>
+                            <label for="confirmarNovaSenha">Confirmar Nova Palavra-passe</label>
+                        </div>
+                        <div id="msgRedefinir" class="small text-center mb-3 fw-bold"></div>
+                        <button type="submit" class="btn btn-success w-100">Atualizar Palavra-passe</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="js/auth.js"></script>
+</body>
+</html>

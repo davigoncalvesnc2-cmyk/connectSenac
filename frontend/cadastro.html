@@ -1,62 +1,84 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connect Senac - Registo</title>
+    <title>Connect Senac - Criar Conta</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f4f7f6; }
+        .card-cadastro { border: none; border-radius: 1rem; }
+        .btn-brand { background-color: #004a8d; color: white; border-radius: 0.5rem; padding: 0.75rem; font-weight: 600; }
+        .btn-brand:hover { background-color: #003366; color: white; }
+        .form-floating > label { font-size: 0.9rem; }</style>
 </head>
-<body class="bg-light py-5">
+<body class="py-5">
 
-    <div class="container d-flex justify-content-center">
-        <div class="col-12 col-md-8 col-lg-6">
-            <div class="card shadow-sm">
-                <div class="card-body p-4">
-                    <h3 class="text-center mb-4">Criar Conta</h3>
+    <div class="container d-flex justify-content-center mt-4">
+        <div class="col-12 col-lg-8 col-xl-6">
+            <div class="card shadow-lg card-cadastro">
+                <div class="card-body p-4 p-md-5">
+                    <h3 class="text-center fw-bold mb-4" style="color: #004a8d;">Criar Nova Conta</h3>
 
                     <form id="formCadastro">
-                        <div class="mb-3">
-                            <label for="nome" class="form-label">Nome Completo</label>
-                            <input type="text" class="form-control" id="nome" required>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="email" class="form-label">E-mail</label>
-                                <input type="email" class="form-control" id="email" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="telefone" class="form-label">Telefone</label>
-                                <input type="text" class="form-control" id="telefone" required>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="senha" class="form-label">Palavra-passe</label>
-                            <input type="password" class="form-control" id="senha" required>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control rounded-3" id="nome" placeholder="Nome Completo" required>
+                            <label for="nome">Nome Completo</label>
                         </div>
 
-                        <div class="alert alert-secondary mt-4">
-                            <h5>Privacidade e Termos (LGPD)</h5>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="email" class="form-control rounded-3" id="email" placeholder="E-mail" required>
+                                    <label for="email">E-mail</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="tel" class="form-control rounded-3" id="telefone" placeholder="Telefone" required>
+                                    <label for="telefone">Telefone (WhatsApp)</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="password" class="form-control rounded-3" id="senha" placeholder="Palavra-passe" required>
+                                    <label for="senha">Palavra-passe</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="password" class="form-control rounded-3" id="confirmar_senha" placeholder="Confirmar Palavra-passe" required>
+                                    <label for="confirmar_senha">Confirmar Palavra-passe</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="p-3 bg-light rounded-3 mb-4 border">
+                            <h6 class="fw-bold mb-3 text-secondary">Privacidade e Termos (LGPD)</h6>
                             <div class="form-check mb-2">
                                 <input class="form-check-input" type="checkbox" id="termoUso" required>
-                                <label class="form-check-label" for="termoUso">
-                                    Li e aceito os Termos de Uso e a Política de Privacidade.*
+                                <label class="form-check-label small" for="termoUso">
+                                    Li e aceito os <a href="#" class="text-decoration-none">Termos de Uso</a> e a <a href="#" class="text-decoration-none">Política de Privacidade</a>.*
                                 </label>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="termoImagem">
-                                <label class="form-check-label" for="termoImagem">
-                                    Autorizo o uso de imagens dos procedimentos realizados para o portfólio acadêmico da turma (Opcional).
+                                <label class="form-check-label small text-muted" for="termoImagem">
+                                    Autorizo o uso de imagens dos procedimentos realizados para o portfólio académico da turma (Opcional).
                                 </label>
                             </div>
                         </div>
 
-                        <div id="mensagemCadastro" class="mb-3"></div>
+                        <div id="mensagemCadastro" class="mb-3 text-center"></div>
 
-                        <button type="submit" class="btn btn-success w-100 mt-2">Finalizar Registo</button>
+                        <button type="submit" class="btn btn-brand w-100">Finalizar Registo</button>
                     </form>
 
-                    <div class="text-center mt-3">
-                        <a href="index.html" class="text-decoration-none">Voltar ao Login</a>
+                    <div class="text-center mt-4">
+                        <a href="index.html" class="text-decoration-none text-muted small">Já tem uma conta? <span class="fw-bold" style="color: #004a8d;">Faça Login</span></a>
                     </div>
                 </div>
             </div>
