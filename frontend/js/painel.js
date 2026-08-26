@@ -1,7 +1,16 @@
 // frontend/js/painel.js
 
-const FALLBACK_BASE_URL = 'http://localhost:3000/api';
-const API_URL = window.location.protocol === 'file:' ? FALLBACK_BASE_URL : `${window.location.origin}/api`;
+function getApiBaseUrl() {
+    const isFile = window.location.protocol === 'file:';
+    const isDevPort = window.location.port && !['3000', '80', '443', ''].includes(window.location.port);
+    if (isFile || isDevPort) {
+        const host = window.location.hostname || 'localhost';
+        return `http://${host}:3000/api`;
+    }
+    return '/api';
+}
+
+const API_URL = getApiBaseUrl();
 
 const token = localStorage.getItem('token');
 if (!token) {

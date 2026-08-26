@@ -1,4 +1,4 @@
-﻿-- ============================================================================
+-- ============================================================================
 -- CONNECT SENAC - SCHEMA DO BANCO DE DADOS (PostgreSQL / Supabase)
 -- ============================================================================
 
@@ -43,7 +43,8 @@ CREATE TABLE IF NOT EXISTS disponibilidades (
     vagas_totais INT NOT NULL CHECK (vagas_totais > 0),
     vagas_ocupadas INT DEFAULT 0 CHECK (vagas_ocupadas >= 0),
     created_at TIMESTAMPTZ DEFAULT NOW(),
-    CONSTRAINT unique_curso_horario UNIQUE (curso_id, data_hora)
+    CONSTRAINT unique_curso_horario UNIQUE (curso_id, data_hora),
+    CONSTRAINT check_vagas_limite CHECK (vagas_ocupadas <= vagas_totais)
 );
 
 -- 5. Tabela Agendamentos

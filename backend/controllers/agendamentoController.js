@@ -70,10 +70,17 @@ exports.criar = async (req, res) => {
         }
 
         // 3. Atualizar o contador de vagas ocupadas
-        await supabase
+        const { error: erroVagas } = await supabase
             .from('disponibilidades')
             .update({ vagas_ocupadas: disponibilidade.vagas_ocupadas + 1 })
             .eq('id', disponibilidade_id);
+
+        if (erroVagas) {
+            if (erroVagas.code === '23514') {
+                return res.status(400).json({ erro: 'Infelizmente, as vagas para este horário se esgotaram.' });
+            }
+            throw erroVagas;
+        }
 
         res.status(201).json({
             mensagem: 'Agendamento realizado com sucesso!',
@@ -81,6 +88,9 @@ exports.criar = async (req, res) => {
         });
 
     } catch (error) {
+        if (error.code === '23514') {
+            return res.status(400).json({ erro: 'Infelizmente, as vagas para este horário se esgotaram.' });
+        }
         console.error('Erro ao agendar:', error.message);
         res.status(500).json({ erro: 'Erro interno ao realizar agendamento.' });
     }

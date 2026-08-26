@@ -3,10 +3,20 @@ const supabase = require('../config/database');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto'); // Biblioteca nativa do Node.js para criptografia
+const emailService = require('../services/emailService');
 
 // 1. LÓGICA DE REGISTO (CADASTRO)
 exports.registrar = async (req, res) => {
-    const { nome, email, telefone, senha, confirmar_senha, consentimento_termos, consentimento_imagem } = req.body;
+    const { nome, telefone, senha, confirmar_senha, consentimento_termos, consentimento_imagem } = req.body;
+    const email = req.body.email ? String(req.body.email).trim().toLowerCase() : '';
+
+    if (!nome || !email || !senha) {
+        return res.status(400).json({ erro: 'Nome, e-mail e senha são obrigatórios.' });
+    }
+
+    if (senha.length < 6) {
+        return res.status(400).json({ erro: 'A senha deve ter no mínimo 6 caracteres.' });
+    }
 
     // [Funcionalidade 1.2] Validação de Confirmação de Palavra-passe
     if (senha !== confirmar_senha) {
@@ -20,11 +30,16 @@ exports.registrar = async (req, res) => {
 
     try {
         // Verificar se o e-mail já existe no Supabase
-        const { data: utilizadorExistente } = await supabase
+        const { data: utilizadorExistente, error: erroChecagem } = await supabase
             .from('usuarios')
             .select('id')
             .eq('email', email)
-            .maybeSingle(); // Devolve o registo ou nulo se não encontrar
+            .maybeSingle();
+
+        if (erroChecagem) {
+            console.error('❌ [ERRO DB CADASTRO]:', erroChecagem.message);
+            throw erroChecagem;
+        }
 
         if (utilizadorExistente) {
             return res.status(400).json({ erro: 'Este e-mail já está em uso.' });
@@ -35,33 +50,37 @@ exports.registrar = async (req, res) => {
         const senhaHash = await bcrypt.hash(senha, salt);
 
         // Inserção de dados no Supabase
-        // Nota: O UUID, a data de criação e o perfil 'candidato' são gerados automaticamente pelo Postgres!
         const { data: novoUtilizador, error: erroInsercao } = await supabase
             .from('usuarios')
             .insert([
                 {
-                    nome,
+                    nome: nome.trim(),
                     email,
-                    telefone,
+                    telefone: telefone ? telefone.trim() : '',
                     senha: senhaHash,
                     consentimento_termos: consentimento_termos === 1 || consentimento_termos === true,
                     consentimento_imagem: consentimento_imagem === 1 || consentimento_imagem === true
                 }
             ])
-            .select(); // Força o retorno dos dados inseridos
+            .select();
 
         if (erroInsercao) throw erroInsercao;
 
         res.status(201).json({ mensagem: 'Utilizador registado com sucesso!', id: novoUtilizador[0].id });
     } catch (error) {
-        console.error('Erro no registo:', error.message);
-        res.status(500).json({ erro: 'Erro interno ao processar o registo.' });
+        console.error('❌ Erro no registo:', error.message || error);
+        res.status(500).json({ erro: 'Erro interno ao processar o registo. Verifique a conexão com o banco de dados.' });
     }
 };
 
 // 2. LÓGICA DE LOGIN
 exports.login = async (req, res) => {
-    const { email, senha } = req.body;
+    const email = req.body.email ? String(req.body.email).trim().toLowerCase() : '';
+    const senha = req.body.senha;
+
+    if (!email || !senha) {
+        return res.status(400).json({ erro: 'E-mail e palavra-passe são obrigatórios.' });
+    }
 
     try {
         // Procurar o utilizador pelo e-mail no Supabase
@@ -71,8 +90,14 @@ exports.login = async (req, res) => {
             .eq('email', email)
             .maybeSingle();
 
-        if (erroBusca) throw erroBusca;
-        if (!utilizador) return res.status(404).json({ erro: 'Utilizador não encontrado.' });
+        if (erroBusca) {
+            console.error('❌ [ERRO DB LOGIN]:', erroBusca.message);
+            throw erroBusca;
+        }
+
+        if (!utilizador) {
+            return res.status(404).json({ erro: 'Utilizador não encontrado. Verifique as suas credenciais.' });
+        }
 
         // [Funcionalidade 2.2] Verificar se o utilizador está bloqueado pela administração
         if (utilizador.is_bloqueado) {
@@ -81,10 +106,11 @@ exports.login = async (req, res) => {
 
         // Comparar a palavra-passe digitada com o Hash do banco
         const senhaValida = await bcrypt.compare(senha, utilizador.senha);
-        if (!senhaValida) return res.status(401).json({ erro: 'Palavra-passe incorreta.' });
+        if (!senhaValida) {
+            return res.status(401).json({ erro: 'Palavra-passe incorreta.' });
+        }
 
         // Gerar o Token de Autenticação (JWT)
-        // Guardamos o 'id' e o 'perfil' (role) dentro do token para o sistema de permissões (RBAC)
         const token = jwt.sign(
             { id: utilizador.id, email: utilizador.email, perfil: utilizador.perfil },
             process.env.JWT_SECRET || 'chave_super_secreta_senac',
@@ -97,8 +123,8 @@ exports.login = async (req, res) => {
             utilizador: { nome: utilizador.nome, email: utilizador.email, perfil: utilizador.perfil }
         });
     } catch (error) {
-        console.error('Erro no login:', error.message);
-        res.status(500).json({ erro: 'Erro interno ao realizar o login.' });
+        console.error('❌ Erro no login:', error.message || error);
+        res.status(500).json({ erro: 'Erro interno ao realizar o login. Verifique se o banco de dados está acessível.' });
     }
 };
 
@@ -139,14 +165,24 @@ exports.solicitarRecuperacao = async (req, res) => {
             })
             .eq('id', utilizador.id);
 
-        // 5. Simular o envio de E-mail (No mundo real, usaríamos o Nodemailer aqui)
-        // Como o Front-end e Back-end dividem a mesma origem, montamos o link dinamicamente
+        // 5. Enviar E-mail Transacional via emailService
         const linkRecuperacao = `${req.protocol}://${req.get('host')}/definirSenha.html?token=${resetToken}`;
-
-        console.log(`\n📧 [SIMULAÇÃO DE E-MAIL]`);
-        console.log(`Para: ${email}`);
-        console.log(`Assunto: Recuperação de Palavra-passe - Connect Senac`);
-        console.log(`Link: ${linkRecuperacao}\n`);
+        await emailService.enviarEmail({
+            to: email,
+            subject: 'Recuperação de Palavra-passe - Connect Senac',
+            text: `Olá, ${utilizador.nome}!\n\nRecebemos uma solicitação para redefinir a sua palavra-passe.\nClique no link abaixo para criar uma nova senha:\n${linkRecuperacao}\n\nEste link é válido por 1 hora.\nSe não solicitou a alteração, ignore este e-mail.`,
+            html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
+                    <h2 style="color: #004a8d;">Connect Senac</h2>
+                    <p>Olá, <strong>${utilizador.nome}</strong>!</p>
+                    <p>Recebemos uma solicitação para redefinir a sua palavra-passe.</p>
+                    <p style="margin: 24px 0;">
+                        <a href="${linkRecuperacao}" style="background-color: #004a8d; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">Redefinir Senha</a>
+                    </p>
+                    <p style="font-size: 12px; color: #666;">Este link é válido por 1 hora. Se você não solicitou esta recuperação, por favor ignore esta mensagem.</p>
+                </div>
+            `
+        });
 
         res.json({ mensagem: 'Se o e-mail existir, receberá um link de recuperação.' });
 
@@ -159,6 +195,10 @@ exports.solicitarRecuperacao = async (req, res) => {
 // 4. REDEFINIR A PALAVRA-PASSE
 exports.redefinirSenha = async (req, res) => {
     const { token, nova_senha, confirmar_senha } = req.body;
+
+    if (!nova_senha || nova_senha.length < 6) {
+        return res.status(400).json({ erro: 'A nova senha deve ter no mínimo 6 caracteres.' });
+    }
 
     if (nova_senha !== confirmar_senha) {
         return res.status(400).json({ erro: 'As palavras-passe não coincidem.' });

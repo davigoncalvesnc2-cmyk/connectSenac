@@ -9,6 +9,10 @@ exports.criar = async (req, res) => {
         return res.status(400).json({ erro: 'Curso, data/hora e número de vagas são obrigatórios.' });
     }
 
+    if (new Date(data_hora) <= new Date()) {
+        return res.status(400).json({ erro: 'A data e hora do curso devem ser futuras.' });
+    }
+
     try {
         const { data: novaDisponibilidade, error } = await supabase
             .from('disponibilidades')

@@ -8,14 +8,26 @@ const cursoRoutes = require('./backend/routes/cursoRoutes');
 const agendamentoRoutes = require('./backend/routes/agendamentoRoutes'); 
 const disponibilidadeRoutes = require('./backend/routes/disponibilidadeRoutes'); 
 
-const path = require('path'); // Adicione esta linha para lidar com caminhos de pastas
+const path = require('path');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middlewares globais
+// Middlewares globais de segurança e parser
+app.use(helmet({ contentSecurityPolicy: false })); // Permite recursos e CDNs externos (ex: Bootstrap)
 app.use(cors()); 
 app.use(express.json()); 
+
+// Rate Limiting para proteção contra ataques de força bruta
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutos
+    max: 10, // limite de 10 requisições por IP na janela de tempo
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { erro: 'Muitas tentativas de acesso a partir deste IP. Tente novamente em 15 minutos.' }
+});
 
 // Servir arquivos estáticos do Frontend
 app.use(express.static(path.join(__dirname, 'frontend')));
@@ -29,6 +41,8 @@ app.get('/api/status', (req, res) => {
 require('./backend/cron/notificador');
 
 // Agrupamento de Rotas da API REST
+app.use('/api/usuarios/login', authLimiter);
+app.use('/api/usuarios/esqueci-senha', authLimiter);
 app.use('/api/usuarios', usuarioRoutes);
 app.use('/api/cursos', cursoRoutes); 
 app.use('/api/disponibilidades', disponibilidadeRoutes); 
