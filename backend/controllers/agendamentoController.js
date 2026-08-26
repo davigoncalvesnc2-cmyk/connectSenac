@@ -30,18 +30,43 @@ exports.criar = async (req, res) => {
             return res.status(400).json({ erro: 'Infelizmente, não há mais vagas para este horário.' });
         }
 
-        // 2. Inserir o Agendamento
-        const { data: novoAgendamento, error: erroAgendamento } = await supabase
+        // 2. Verificar se já existe agendamento prévio do usuário para esta disponibilidade
+        const { data: agendamentoExistente } = await supabase
             .from('agendamentos')
-            .insert([{ usuario_id, disponibilidade_id, status: 'agendado' }])
-            .select();
+            .select('id, status')
+            .eq('usuario_id', usuario_id)
+            .eq('disponibilidade_id', disponibilidade_id)
+            .maybeSingle();
 
-        if (erroAgendamento) {
-            // Se cair na regra UNIQUE do banco de dados (mesmo utilizador e mesma vaga)
-            if (erroAgendamento.code === '23505') {
+        let agendamentoFinal = null;
+
+        if (agendamentoExistente) {
+            if (agendamentoExistente.status === 'agendado') {
                 return res.status(400).json({ erro: 'Você já está agendado para este exato horário!' });
             }
-            throw erroAgendamento;
+            // Reativar agendamento que havia sido cancelado
+            const { data: reativado, error: erroUpdate } = await supabase
+                .from('agendamentos')
+                .update({ status: 'agendado' })
+                .eq('id', agendamentoExistente.id)
+                .select();
+
+            if (erroUpdate) throw erroUpdate;
+            agendamentoFinal = reativado[0];
+        } else {
+            // Inserir novo agendamento
+            const { data: novoAgendamento, error: erroAgendamento } = await supabase
+                .from('agendamentos')
+                .insert([{ usuario_id, disponibilidade_id, status: 'agendado' }])
+                .select();
+
+            if (erroAgendamento) {
+                if (erroAgendamento.code === '23505') {
+                    return res.status(400).json({ erro: 'Você já está agendado para este exato horário!' });
+                }
+                throw erroAgendamento;
+            }
+            agendamentoFinal = novoAgendamento[0];
         }
 
         // 3. Atualizar o contador de vagas ocupadas
@@ -52,7 +77,7 @@ exports.criar = async (req, res) => {
 
         res.status(201).json({
             mensagem: 'Agendamento realizado com sucesso!',
-            agendamento: novoAgendamento[0]
+            agendamento: agendamentoFinal
         });
 
     } catch (error) {

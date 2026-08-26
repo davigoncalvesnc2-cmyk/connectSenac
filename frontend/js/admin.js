@@ -42,6 +42,18 @@ document.getElementById('btnSair').addEventListener('click', () => {
     window.location.href = 'index.html';
 });
 
+// Utilitário de Sanitização contra XSS
+function escapeHTML(str) {
+    if (!str) return '';
+    return String(str).replace(/[&<>'"]/g, tag => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        "'": '&#39;',
+        '"': '&quot;'
+    }[tag] || tag));
+}
+
 // ============================================================================
 // 1. CARREGAR MÉTRICAS DO DASHBOARD
 // ============================================================================
@@ -75,11 +87,10 @@ async function carregarUtilizadores() {
 
         tbody.innerHTML = '';
         if (users.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">Nenhum utilizador registado.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted">Nenhum utilizador registado.</td></tr>';
             return;
         }
 
-        // Substitua o loop 'users.forEach' na função carregarUtilizadores por esta versão:
         users.forEach(user => {
             const statusBadge = user.is_bloqueado
                 ? '<span class="badge bg-danger">Bloqueado</span>'
@@ -88,9 +99,10 @@ async function carregarUtilizadores() {
             // Controle de Exclusão por RBAC na Interface
             // Coordenador só vê botão excluir ativo se for candidato. Admin vê ativo para todos.
             const podeExcluir = payloadToken.perfil === 'admin' || (payloadToken.perfil === 'coordenador' && user.perfil === 'candidato');
+            const nomeEscapado = escapeHTML(user.nome).replace(/'/g, "\\'");
 
             const btnExcluir = podeExcluir
-                ? `<button class="btn btn-sm btn-danger ms-1" onclick="excluirUsuario('${user.id}', '${user.nome}')">Excluir</button>`
+                ? `<button class="btn btn-sm btn-danger ms-1" onclick="excluirUsuario('${user.id}', '${nomeEscapado}')">Excluir</button>`
                 : '';
 
             const btnBloqueio = payloadToken.perfil === 'admin'
@@ -103,18 +115,18 @@ async function carregarUtilizadores() {
             const row = `
         <tr>
             <td>
-                <div class="fw-bold">${user.nome}</div>
+                <div class="fw-bold">${escapeHTML(user.nome)}</div>
                 <div class="text-muted small">Membro desde: ${new Date(user.created_at).toLocaleDateString('pt-BR')}</div>
             </td>
             <td>
-                <div>${user.email}</div>
-                <div class="text-muted small">${user.telefone}</div>
+                <div>${escapeHTML(user.email)}</div>
+                <div class="text-muted small">${escapeHTML(user.telefone)}</div>
             </td>
             <td>
-                <span class="badge bg-secondary">${user.perfil.toUpperCase()}</span>
+                <span class="badge bg-secondary">${escapeHTML(user.perfil.toUpperCase())}</span>
                 <div class="mt-1">${statusBadge}</div>
             </td>
-            <td><span class="text-muted small">${user.cursos_ativos}</span></td>
+            <td><span class="text-muted small">${escapeHTML(user.cursos_ativos)}</span></td>
             <td class="text-center fw-bold text-primary">${user.total_agendados}</td>
             <td class="text-center fw-bold text-success">${user.total_concluidos}</td>
             <td class="text-center fw-bold text-danger">${user.total_cancelados}</td>
@@ -129,7 +141,7 @@ async function carregarUtilizadores() {
             tbody.innerHTML += row;
         });
     } catch (error) {
-        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-danger">Erro ao ligar ao servidor.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center text-danger">Erro ao ligar ao servidor.</td></tr>';
     }
 }
 
@@ -212,13 +224,14 @@ formCurso.addEventListener('submit', async (e) => {
     const msgDiv = document.getElementById('msgCurso');
     msgDiv.innerHTML = '<span class="text-primary">A guardar curso...</span>';
 
-    // Substitua o payload antigo por este que inclui o profissional_id
     const payload = {
         nome: document.getElementById('nomeCurso').value,
         descricao: document.getElementById('descricaoCurso').value,
         motivo_modelo: document.getElementById('motivoCurso').value,
         restricoes: document.getElementById('restricoesCurso').value,
-        profissional_id: document.getElementById('selectProfissional').value // VÍNCULO ADICIONADO!
+        foto_url: document.getElementById('fotoCurso')?.value || null,
+        localizacao: document.getElementById('localCurso')?.value || 'SENAC',
+        profissional_id: document.getElementById('selectProfissional').value
     };
     try {
         const response = await fetch(`${API_URL}/cursos`, {
@@ -389,19 +402,21 @@ async function carregarCursosAdmin() {
                 ? '<span class="badge bg-success">Ativo</span>'
                 : '<span class="badge bg-secondary">Arquivado</span>';
 
+            const nomeCursoEscapado = escapeHTML(curso.nome).replace(/'/g, "\\'");
+
             // O arquivamento é um Soft Delete. Só mostramos o botão se estiver ativo.
             const btnArquivar = curso.status === 'ativo'
-                ? `<button class="btn btn-sm btn-outline-danger ms-1" onclick="arquivarCurso('${curso.id}', '${curso.nome}')">Arquivar</button>`
+                ? `<button class="btn btn-sm btn-outline-danger ms-1" onclick="arquivarCurso('${curso.id}', '${nomeCursoEscapado}')">Arquivar</button>`
                 : '';
 
             const row = `
                 <tr>
                     <td>
-                        <div class="fw-bold text-dark">${curso.nome}</div>
-                        <div class="small text-muted text-truncate" style="max-width: 200px;">${curso.descricao}</div>
+                        <div class="fw-bold text-dark">${escapeHTML(curso.nome)}</div>
+                        <div class="small text-muted text-truncate" style="max-width: 200px;">${escapeHTML(curso.descricao)}</div>
                     </td>
-                    <td>${profNome}</td>
-                    <td class="small">${curso.localizacao || '-'}</td>
+                    <td>${escapeHTML(profNome)}</td>
+                    <td class="small">${escapeHTML(curso.localizacao || '-')}</td>
                     <td>${statusBadge}</td>
                     <td class="text-end">
                         <button class="btn btn-sm btn-outline-primary" onclick='abrirModalEdicao(${JSON.stringify(curso).replace(/'/g, "&#39;")})'>Editar</button>

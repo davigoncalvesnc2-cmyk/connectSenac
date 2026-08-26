@@ -46,6 +46,8 @@ cron.schedule('* * * * *', async () => {
             }
 
             const dataCurso = new Date(ag.disponibilidades.data_hora);
+            const diferencaEmMinutos = Math.round((dataCurso.getTime() - agora.getTime()) / (1000 * 60));
+
             // Notifica se faltar aproximadamente 24h (~1440 min) ou 3h (~180 min)
             const is24Horas = diferencaEmMinutos >= 1439 && diferencaEmMinutos <= 1441;
             const is3Horas = diferencaEmMinutos >= 179 && diferencaEmMinutos <= 181;

@@ -34,6 +34,18 @@ document.getElementById('btnSair').addEventListener('click', () => {
     window.location.href = 'index.html';
 });
 
+// Utilitário de Sanitização contra XSS
+function escapeHTML(str) {
+    if (!str) return '';
+    return String(str).replace(/[&<>'"]/g, tag => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        "'": '&#39;',
+        '"': '&quot;'
+    }[tag] || tag));
+}
+
 // Instâncias dos Modais do Bootstrap
 const modalAgendamento = new bootstrap.Modal(document.getElementById('modalAgendamento'));
 const modalFeedback = new bootstrap.Modal(document.getElementById('modalFeedback'));
@@ -57,16 +69,19 @@ async function carregarCursos(){
 
         cursos.forEach(curso => {
             const profNome = curso.usuarios ? curso.usuarios.nome : 'A definir';
-            const local = curso.localizacao ? `<div class="text-muted small mb-2"><i class="bi bi-geo-alt"></i> ${curso.localizacao}</div>` : '';
+            const local = curso.localizacao ? `<div class="text-muted small mb-2"><i class="bi bi-geo-alt"></i> ${escapeHTML(curso.localizacao)}</div>` : '';
+            const nomeCursoEscapado = escapeHTML(curso.nome).replace(/'/g, "\\'");
+            const descCursoEscapada = escapeHTML(curso.descricao).replace(/'/g, "\\'");
+
             const card = `
                 <div class="col-md-6 col-lg-4">
                     <div class="card shadow-sm h-100 card-curso">
                         <div class="card-body d-flex flex-column">
-                            <h5 class="card-title fw-bold text-dark">${curso.nome}</h5>
-                            <h6 class="card-subtitle mb-2 text-muted small">Prof. ${profNome}</h6>
+                            <h5 class="card-title fw-bold text-dark">${escapeHTML(curso.nome)}</h5>
+                            <h6 class="card-subtitle mb-2 text-muted small">Prof. ${escapeHTML(profNome)}</h6>
                             ${local}
-                            <p class="card-text small text-secondary mt-2 flex-grow-1">${curso.descricao}</p>
-                            <button class="btn btn-outline-primary btn-sm w-100 fw-bold mt-3" onclick="abrirModalAgendamento('${curso.id}', '${curso.nome.replace(/'/g, "\\'")}', '${curso.descricao.replace(/'/g, "\\'")}')">Ver Horários</button>
+                            <p class="card-text small text-secondary mt-2 flex-grow-1">${escapeHTML(curso.descricao)}</p>
+                            <button class="btn btn-outline-primary btn-sm w-100 fw-bold mt-3" onclick="abrirModalAgendamento('${curso.id}', '${nomeCursoEscapado}', '${descCursoEscapada}')">Ver Horários</button>
                         </div>
                     </div>
                 </div>
@@ -190,7 +205,7 @@ async function carregarMeusAgendamentos(){
                         <div class="card-body p-3 d-flex flex-column justify-content-between">
                             <div>
                                 <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span class="fw-bold text-dark">${cursoNome}</span>
+                                    <span class="fw-bold text-dark">${escapeHTML(cursoNome)}</span>
                                     ${badge}
                                 </div>
                                 <div class="text-secondary small mb-2"><i class="bi bi-calendar"></i> ${dataHora}</div>

@@ -62,6 +62,18 @@
             window.location.href = 'index.html';
         });
 
+        // Utilitário de Sanitização contra XSS
+        function escapeHTML(str) {
+            if (!str) return '';
+            return String(str).replace(/[&<>'"]/g, tag => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                "'": '&#39;',
+                '"': '&quot;'
+            }[tag] || tag));
+        }
+
         async function carregarMinhasTurmas(){
             const accordion = document.getElementById('accordionTurmas');
             try {
@@ -93,19 +105,19 @@
                         if (agendamentosAtivos.length === 0) {
                             tabelaModelos = `<p class="text-muted small mb-0 mt-2">Nenhum modelo agendado para este horário ainda.</p>`;
                         } else {
-                                                     // Lógica para mostrar o botão ou apenas o selo
                             let linhas = agendamentosAtivos.map(ag => {
                                 let acoesHTML = '';
                                 if (ag.status === 'agendado') {
                                     acoesHTML = `<button class="btn btn-sm btn-outline-success fw-bold w-100" onclick="concluirServico('${ag.id}')">✅ Confirmar Presença</button>`;
                                 } else {
-                                    acoesHTML = `<span class="badge w-100 py-2 ${ag.status === 'concluido' ? 'bg-success' : 'bg-secondary'}">${ag.status.toUpperCase()}</span>`;
+                                    acoesHTML = `<span class="badge w-100 py-2 ${ag.status === 'concluido' ? 'bg-success' : 'bg-secondary'}">${escapeHTML(ag.status.toUpperCase())}</span>`;
                                 }
 
+                                const telLimpo = ag.usuarios.telefone ? String(ag.usuarios.telefone).replace(/\D/g, '') : '';
                                 return `
                                 <tr>
-                                    <td class="align-middle">${ag.usuarios.nome}</td>
-                                    <td class="align-middle"><a href="https://wa.me/55${ag.usuarios.telefone.replace(/\D/g, '')}" target="_blank" class="text-decoration-none text-success">📱 ${ag.usuarios.telefone}</a></td>
+                                    <td class="align-middle">${escapeHTML(ag.usuarios.nome)}</td>
+                                    <td class="align-middle"><a href="https://wa.me/55${telLimpo}" target="_blank" class="text-decoration-none text-success">📱 ${escapeHTML(ag.usuarios.telefone)}</a></td>
                                     <td class="align-middle" style="width: 150px;">${acoesHTML}</td>
                                 </tr>
                                 `;
@@ -133,7 +145,7 @@
                         <div class="accordion-item border-0 border-bottom">
                             <h2 class="accordion-header">
                                 <button class="accordion-button ${btnCollapsed}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${curso.id}">
-                                    📘 ${curso.nome}
+                                    📘 ${escapeHTML(curso.nome)}
                                 </button>
                             </h2>
                             <div id="collapse${curso.id}" class="accordion-collapse collapse ${itemOpen}" data-bs-parent="#accordionTurmas">
