@@ -4,32 +4,111 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel do Docente - Connect Senac</title>
+    <!-- Bootstrap 5 CSS & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Design System Global -->
+    <link rel="stylesheet" href="css/style.css">
     <style>
-        body { background-color: #f4f7f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .navbar-brand { font-weight: 700; }
-        .section-title { color: #004a8d; font-weight: 700; }
-        .accordion-button:not(.collapsed) { background-color: #e9f2fa; color: #004a8d; font-weight: bold; }</style>
+        .accordion-item-senac {
+            border: 1px solid var(--surface-border);
+            border-radius: var(--radius-lg) !important;
+            overflow: hidden;
+            background-color: #FFFFFF;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow-card);
+            transition: var(--transition-smooth);
+        }
+        .accordion-item-senac:hover {
+            border-color: rgba(0, 69, 135, 0.25);
+            box-shadow: var(--shadow-elevated);
+        }
+        .accordion-button-senac {
+            background-color: #FFFFFF;
+            color: var(--brand-primary);
+            font-weight: 700;
+            padding: 1.25rem 1.5rem;
+            font-size: 1.05rem;
+            border: none;
+            box-shadow: none !important;
+        }
+        .accordion-button-senac:not(.collapsed) {
+            background: var(--brand-primary-light);
+            color: var(--brand-primary);
+        }
+    </style>
 </head>
-<body>
-    <nav class="navbar navbar-expand-lg navbar-dark shadow-sm" style="background-color: #004a8d;">
-        <div class="container">
-            <a class="navbar-brand" href="#">Connect Senac <span class="badge bg-light text-dark ms-2">Área do Professor</span></a>
-            <button class="btn btn-outline-light btn-sm" id="btnSair">Sair</button>
+<body class="d-flex flex-column min-vh-100" style="background-color: var(--bg-canvas);">
+
+    <!-- Navbar Institucional -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-senac sticky-top py-2">
+        <div class="container-fluid px-3 px-lg-4">
+            <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="#">
+                <span class="fs-5">Connect Senac</span>
+                <span class="navbar-brand-badge">Área do Professor</span>
+            </a>
+
+            <button class="btn btn-outline-light btn-sm rounded-pill px-3 ms-auto d-flex align-items-center gap-1 shadow-sm" id="btnSair">
+                <i class="bi bi-box-arrow-right"></i>
+                <span>Sair</span>
+            </button>
         </div>
     </nav>
 
-    <div class="container py-5">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4 class="section-title">👨‍🏫 As Minhas Turmas e Listas de Modelos</h4>
-            <span class="text-muted small">Ligado como: <strong id="nomeProf">--</strong></span>
-        </div>
-
-        <div class="accordion shadow-sm" id="accordionTurmas">
-            <div class="text-center text-muted p-5">A carregar a pauta de presenças...</div>
+    <!-- Sub-header Docente -->
+    <div class="bg-white border-bottom py-2 mb-4 shadow-sm">
+        <div class="container-fluid px-3 px-lg-4 d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-2">
+                <span class="d-inline-flex p-1 rounded-circle bg-light text-primary">
+                    <i class="bi bi-person-badge-fill text-primary"></i>
+                </span>
+                <span class="text-secondary small">
+                    Docente Responsável: <strong id="nomeProf" style="color: var(--brand-primary);">--</strong>
+                </span>
+            </div>
+            <span class="badge-senac-primary">Corpo Docente</span>
         </div>
     </div>
 
+    <!-- Conteúdo Principal -->
+    <main class="container-fluid px-3 px-lg-4 pb-5 flex-grow-1">
+        
+        <!-- Header de Boas-vindas -->
+        <div class="content-card mb-4">
+            <div class="content-card-body p-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                <div>
+                    <span class="badge-senac-accent mb-2">
+                        <i class="bi bi-journal-check"></i> Gestão de Práticas
+                    </span>
+                    <h1 class="h3 fw-bold mb-1" style="color: var(--brand-primary);">👨‍🏫 Gestão de Turmas e Modelos</h1>
+                    <p class="text-muted small mb-0">Confirme a presença de modelos e gerencie as pautas de atendimento prático em tempo real.</p>
+                </div>
+                <button class="btn btn-senac-outline btn-sm rounded-pill px-3 align-self-start align-self-md-auto" onclick="carregarMinhasTurmas()">
+                    <i class="bi bi-arrow-clockwise"></i>
+                    <span>Atualizar Pauta</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Lista de Cursos e Turmas -->
+        <div class="accordion" id="accordionTurmas">
+            <div class="content-card p-5 text-center text-muted">
+                <div class="spinner-border text-primary mb-3" role="status"></div>
+                <h6 class="fw-bold text-dark">A carregar a pauta de presenças...</h6>
+                <p class="small text-muted mb-0">Buscando as turmas vinculadas ao seu usuário.</p>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Rodapé -->
+    <footer class="bg-white border-top py-3 mt-auto">
+        <div class="container-fluid px-4 text-center text-muted small">
+            Connect Senac &copy; Módulo Docente de Práticas Acadêmicas e Atendimento a Modelos.
+        </div>
+    </footer>
+
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         function getApiBaseUrl() {
@@ -71,7 +150,6 @@
             window.location.href = 'index.html';
         });
 
-        // Utilitário de Sanitização contra XSS
         function escapeHTML(str) {
             if (!str) return '';
             return String(str).replace(/[&<>'"]/g, tag => ({
@@ -93,55 +171,68 @@
                 const cursos = await response.json();
                 accordion.innerHTML = '';
 
-                if (cursos.length === 0) {
-                    accordion.innerHTML = '<div class="alert alert-info border-0 shadow-sm">Nenhum curso ativo vinculado ao seu perfil de momento.</div>';
+                if (!cursos || cursos.length === 0) {
+                    accordion.innerHTML = `
+                        <div class="content-card p-5 text-center text-muted">
+                            <i class="bi bi-calendar-x fs-1 d-block mb-3 text-warning"></i>
+                            <h5 class="fw-bold text-dark">Nenhum curso ativo vinculado</h5>
+                            <p class="small mb-0">Você não possui turmas ou horários de atendimento abertos no momento.</p>
+                        </div>`;
                     return;
                 }
 
                 cursos.forEach((curso, index) => {
                     let horariosHTML = '';
-
-                    // Ordenar as disponibilidades por data no Front-end por garantia
                     curso.disponibilidades.sort((a, b) => new Date(a.data_hora) - new Date(b.data_hora));
 
                     curso.disponibilidades.forEach(disp => {
                         const dataFormatada = new Date(disp.data_hora).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
-
-                        // Filtrar agendamentos que não foram cancelados
                         const agendamentosAtivos = disp.agendamentos.filter(a => a.status !== 'cancelado');
 
                         let tabelaModelos = '';
                         if (agendamentosAtivos.length === 0) {
-                            tabelaModelos = `<p class="text-muted small mb-0 mt-2">Nenhum modelo agendado para este horário ainda.</p>`;
+                            tabelaModelos = `<div class="p-3 bg-light rounded-3 text-muted small fst-italic mt-2"><i class="bi bi-info-circle me-1"></i>Nenhum modelo agendado para este horário até o momento.</div>`;
                         } else {
                             let linhas = agendamentosAtivos.map(ag => {
                                 let acoesHTML = '';
                                 if (ag.status === 'agendado') {
-                                    acoesHTML = `<button class="btn btn-sm btn-outline-success fw-bold w-100" onclick="concluirServico('${ag.id}')">✅ Confirmar Presença</button>`;
+                                    acoesHTML = `<button class="btn btn-sm btn-senac-accent rounded-pill px-3 py-1" onclick="concluirServico('${ag.id}')"><i class="bi bi-check2-circle me-1"></i> Confirmar Presença</button>`;
                                 } else {
-                                    acoesHTML = `<span class="badge w-100 py-2 ${ag.status === 'concluido' ? 'bg-success' : 'bg-secondary'}">${escapeHTML(ag.status.toUpperCase())}</span>`;
+                                    acoesHTML = `<span class="badge rounded-pill px-3 py-2 ${ag.status === 'concluido' ? 'bg-success-subtle text-success border border-success-subtle' : 'bg-secondary-subtle text-secondary border border-secondary-subtle'}"><i class="bi bi-check-all me-1"></i>${escapeHTML(ag.status.toUpperCase())}</span>`;
                                 }
 
-                                const telLimpo = ag.usuarios.telefone ? String(ag.usuarios.telefone).replace(/\D/g, '') : '';
+                                const telLimpo = ag.usuarios?.telefone ? String(ag.usuarios.telefone).replace(/\D/g, '') : '';
                                 return `
                                 <tr>
-                                    <td class="align-middle">${escapeHTML(ag.usuarios.nome)}</td>
-                                    <td class="align-middle"><a href="https://wa.me/55${telLimpo}" target="_blank" class="text-decoration-none text-success">📱 ${escapeHTML(ag.usuarios.telefone)}</a></td>
-                                    <td class="align-middle" style="width: 150px;">${acoesHTML}</td>
+                                    <td class="align-middle fw-bold text-dark">${escapeHTML(ag.usuarios?.nome || 'Modelo')}</td>
+                                    <td class="align-middle">
+                                        ${telLimpo ? `<a href="https://wa.me/55${telLimpo}" target="_blank" rel="noopener" class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-2 text-decoration-none d-inline-flex align-items-center gap-1"><i class="bi bi-whatsapp"></i> ${escapeHTML(ag.usuarios?.telefone)}</a>` : '<span class="text-muted small">Sem telefone</span>'}
+                                    </td>
+                                    <td class="align-middle text-end" style="min-width: 190px;">${acoesHTML}</td>
                                 </tr>
                                 `;
                             }).join('');
 
                             tabelaModelos = `
-                                <table class="table table-sm mt-3 border">
-                                    <thead class="table-light"><tr><th>Modelo</th><th>Contacto</th><th>Status</th></tr></thead>
-                                    <tbody>${linhas}</tbody>
-                                </table>`;
+                                <div class="table-responsive mt-3">
+                                    <table class="table table-modern table-sm align-middle mb-0">
+                                        <thead><tr><th>Modelo Cadastrado</th><th>Contato Direto (WhatsApp)</th><th class="text-end">Presença & Status</th></tr></thead>
+                                        <tbody>${linhas}</tbody>
+                                    </table>
+                                </div>`;
                         }
 
                         horariosHTML += `
-                            <div class="mb-4 p-3 bg-white border rounded">
-                                <div class="fw-bold text-dark border-bottom pb-2">📅 Aula: ${dataFormatada} <span class="badge bg-secondary float-end">Ocupação: ${disp.vagas_ocupadas} / ${disp.vagas_totais}</span></div>
+                            <div class="mb-3 p-3 bg-white border rounded-4 shadow-sm">
+                                <div class="fw-bold text-dark border-bottom pb-2 d-flex flex-wrap justify-content-between align-items-center gap-2">
+                                    <span class="d-flex align-items-center gap-2">
+                                        <i class="bi bi-calendar-event text-warning fs-5"></i>
+                                        <span>Horário de Aula: <strong>${dataFormatada}</strong></span>
+                                    </span>
+                                    <span class="badge-senac-primary">
+                                        <i class="bi bi-people-fill me-1"></i> Ocupação: ${disp.vagas_ocupadas} / ${disp.vagas_totais}
+                                    </span>
+                                </div>
                                 ${tabelaModelos}
                             </div>
                         `;
@@ -151,15 +242,16 @@
                     const btnCollapsed = index === 0 ? '' : 'collapsed';
 
                     accordion.innerHTML += `
-                        <div class="accordion-item border-0 border-bottom">
+                        <div class="accordion-item-senac">
                             <h2 class="accordion-header">
-                                <button class="accordion-button ${btnCollapsed}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${curso.id}">
-                                    📘 ${escapeHTML(curso.nome)}
+                                <button class="accordion-button accordion-button-senac ${btnCollapsed} d-flex align-items-center gap-2" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${curso.id}">
+                                    <i class="bi bi-journal-bookmark-fill text-warning"></i>
+                                    <span>${escapeHTML(curso.nome)}</span>
                                 </button>
                             </h2>
                             <div id="collapse${curso.id}" class="accordion-collapse collapse ${itemOpen}" data-bs-parent="#accordionTurmas">
-                                <div class="accordion-body bg-light">
-                                    ${horariosHTML || '<p class="text-muted">Sem horários abertos para este curso.</p>'}
+                                <div class="accordion-body p-4" style="background-color: var(--bg-canvas);">
+                                    ${horariosHTML || '<p class="text-muted mb-0">Sem horários abertos para este curso.</p>'}
                                 </div>
                             </div>
                         </div>
@@ -167,11 +259,12 @@
                 });
 
             } catch (error) {
-                accordion.innerHTML = '<div class="text-danger p-4">Erro ao carregar os dados.</div>';
+                accordion.innerHTML = '<div class="alert-custom alert-custom-danger m-3"><i class="bi bi-exclamation-triangle-fill"></i><span>Erro ao carregar a pauta de presenças.</span></div>';
             }
         }
- async function concluirServico(agendamentoId){
-            if (!confirm("O modelo compareceu e o serviço foi realizado com sucesso?")) return;
+
+        async function concluirServico(agendamentoId){
+            if (!confirm("O modelo compareceu e o atendimento prático foi realizado com sucesso?")) return;
 
             try {
                 const response = await fetch(`${API_URL}/profissional/agendamentos/${agendamentoId}/concluir`, {
@@ -180,15 +273,16 @@
                 });
 
                 if (response.ok) {
-                    carregarMinhasTurmas(); // Recarrega a tabela instantaneamente
+                    carregarMinhasTurmas();
                 } else {
                     const data = await response.json();
-                    alert(data.erro);
+                    alert(data.erro || 'Falha ao registrar presença.');
                 }
             } catch (error) {
-                alert('Erro ao ligar ao servidor.');
+                alert('Erro de conexão ao servidor.');
             }
         }
-        carregarMinhasTurmas();</script>
+        carregarMinhasTurmas();
+    </script>
 </body>
 </html>

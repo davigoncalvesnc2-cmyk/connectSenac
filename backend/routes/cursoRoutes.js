@@ -5,8 +5,8 @@ const cursoController = require('../controllers/cursoController');
 const authMiddleware = require('../middlewares/authMiddleware');
 const autorizarPerfis = require('../middlewares/rbacMiddleware');
 
-// Rota Aberta (Vitrine)
-router.get('/ativos', authMiddleware, cursoController.listarAtivos);
+// Rota Pública (Vitrine de Cursos Abertos para Visitantes e Alunos)
+router.get('/ativos', cursoController.listarAtivos);
 
 // Nova Rota Restrita (Gestão Completa)
 router.get('/admin', authMiddleware, autorizarPerfis('admin', 'coordenador'), cursoController.listarTodosAdmin);

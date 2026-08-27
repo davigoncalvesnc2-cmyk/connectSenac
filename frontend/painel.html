@@ -3,94 +3,360 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connect Senac - Painel do Modelo</title>
+    <title>Connect Senac - Painel do Modelo & Vitrine Pública</title>
+    <!-- Bootstrap 5 CSS & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Design System Global -->
+    <link rel="stylesheet" href="css/style.css">
     <style>
-        body { background-color: #f4f7f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .navbar-brand { font-weight: 700; letter-spacing: 0.5px; }
-        .card-curso { border: none; border-radius: 12px; transition: transform 0.2s; }
-        .card-curso:hover { transform: translateY(-5px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important; }
-        .btn-brand { background-color: #004a8d; color: white; border-radius: 8px; font-weight: 600; }
-        .btn-brand:hover { background-color: #003366; color: white; }
-        .section-title { color: #004a8d; font-weight: 700; border-bottom: 2px solid #004a8d; padding-bottom: 0.5rem; margin-bottom: 1.5rem; }</style>
+        .banner-hero-model {
+            background: var(--brand-gradient-hero);
+            border-radius: var(--radius-xl);
+            color: #ffffff;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .banner-hero-model::after {
+            content: '';
+            position: absolute;
+            top: -40%;
+            right: -10%;
+            width: 380px;
+            height: 380px;
+            background: radial-gradient(circle, rgba(244, 121, 32, 0.3) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .card-course {
+            border: 1px solid var(--surface-border);
+            border-radius: var(--radius-lg);
+            background: #ffffff;
+            transition: var(--transition-smooth);
+            overflow: hidden;
+            box-shadow: var(--shadow-card);
+        }
+        .card-course:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-elevated);
+            border-color: var(--brand-accent);
+        }
+        .course-img-wrapper {
+            position: relative;
+            height: 180px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #002244, #004587);
+        }
+        .course-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.35s ease;
+        }
+        .card-course:hover .course-img {
+            transform: scale(1.05);
+        }
+        .section-header-line {
+            border-left: 4px solid var(--brand-accent);
+            padding-left: 0.85rem;
+        }
+        .metric-card-model {
+            background: #FFFFFF;
+            border: 1px solid var(--surface-border);
+            border-radius: var(--radius-lg);
+            padding: 1.25rem 1.5rem;
+            box-shadow: var(--shadow-subtle);
+            transition: var(--transition-smooth);
+        }
+        .metric-card-model:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-card);
+        }
+        .filter-btn-model {
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 0.4rem 1rem;
+            transition: var(--transition-fast);
+        }
+    </style>
 </head>
-<body>
+<body class="d-flex flex-column min-vh-100" style="background-color: var(--bg-canvas);">
 
-    <nav class="navbar navbar-expand-lg navbar-dark shadow-sm" style="background-color: #004a8d;">
-        <div class="container">
-            <a class="navbar-brand" href="#">Connect Senac <span class="badge bg-light text-dark ms-2">Área do Modelo</span></a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+    <!-- Navbar Institucional com Adaptação Visitante / Autenticado -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-senac sticky-top py-2 shadow-sm">
+        <div class="container-fluid px-3 px-lg-4">
+            <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="#">
+                <span class="fs-5">Connect Senac</span>
+                <span id="badgePerfilNavbar" class="navbar-brand-badge">Área do Modelo</span>
+            </a>
+            <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Alternar navegação">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
-                <ul class="navbar-nav">
-                    <li class="nav-item"><a class="nav-link active" href="#vitrine">Cursos & Vagas</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#meus-agendamentos">Meus Agendamentos</a></li>
+                <ul class="navbar-nav my-2 my-lg-0 gap-lg-2">
+                    <li class="nav-item">
+                        <a class="nav-link active fw-semibold d-flex align-items-center gap-1 text-white" href="#vitrine">
+                            <i class="bi bi-grid-fill text-warning"></i> Cursos & Vagas
+                        </a>
+                    </li>
+                    <li class="nav-item" id="navItemMeusAgendamentos">
+                        <a class="nav-link fw-semibold text-white-50 d-flex align-items-center gap-1" href="#meus-agendamentos">
+                            <i class="bi bi-calendar-check"></i> Minhas Inscrições (Arquivo)
+                        </a>
+                    </li>
                 </ul>
-                <div class="d-flex align-items-center gap-3 mt-2 mt-lg-0">
-                    <span class="text-white small">Olá, <strong id="userNome">Modelo</strong></span>
-                    <button class="btn btn-outline-light btn-sm" id="btnSair">Sair</button>
+                
+                <!-- Área de Ações do Usuário (Logado x Visitante) -->
+                <div class="d-flex align-items-center gap-2 mt-3 mt-lg-0 pt-2 pt-lg-0 border-top border-lg-0 border-white-50" id="userAreaNavbar">
+                    <!-- Preenchido dinamicamente pelo painel.js -->
+                    <span class="text-white small">Olá, <strong id="userNome" class="text-warning">Modelo</strong></span>
+                    <button class="btn btn-outline-light btn-sm rounded-pill px-3 shadow-sm" id="btnSair">
+                        <i class="bi bi-box-arrow-right me-1"></i> Sair
+                    </button>
                 </div>
             </div>
         </div>
     </nav>
 
-    <div class="container py-5">
+    <!-- Conteúdo Principal -->
+    <main class="container-fluid px-3 px-lg-4 py-4 py-md-5 flex-grow-1">
 
-        <h4 class="section-title" id="meus-agendamentos">📅 Os Meus Agendamentos</h4>
-        <div id="listaMeusAgendamentos" class="row g-3 mb-5">
-            <div class="text-center text-muted">A carregar os seus agendamentos...</div>
-        </div>
-
-        <h4 class="section-title" id="vitrine">✨ Cursos Disponíveis para Modelos</h4>
-        <div id="listaCursos" class="row g-4">
-            <div class="text-center text-muted">A carregar o catálogo de serviços...</div>
-        </div>
-
-    </div>
-
-    <!-- Modal de Agendamento -->
-    <div class="modal fade" id="modalAgendamento" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content rounded-4 border-0 shadow">
-                <div class="modal-header border-bottom-0 pb-0">
-                    <h5 class="modal-title fw-bold" id="modalCursoNome">Escolher Horário</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <!-- Banner Hero Institucional -->
+        <section class="banner-hero-model p-4 p-md-5 mb-5 shadow-sm">
+            <div class="row align-items-center position-relative z-1">
+                <div class="col-lg-8">
+                    <span class="badge-senac-accent mb-3">
+                        <i class="bi bi-stars"></i> Atendimento Prático 100% Gratuito
+                    </span>
+                    <h1 class="h2 fw-bold mb-3 text-white" id="heroTitulo">Participe como Modelo nos Cursos do Senac</h1>
+                    <p class="text-white-50 mb-4 lead fs-6" id="heroSubtitulo" style="max-width: 640px;">
+                        Agende horários para procedimentos estéticos, cortes de cabelo, manicure e serviços de beleza executados por alunos sob supervisão direta de professores especialistas.
+                    </p>
+                    <div class="d-flex flex-wrap gap-3">
+                        <a href="#vitrine" class="btn btn-senac-accent px-4 py-3 shadow-sm">
+                            <i class="bi bi-calendar-event-fill me-1"></i> Explorar Cursos & Vagas
+                        </a>
+                        <a href="cadastro.html" class="btn btn-outline-light px-4 py-3 shadow-sm d-none" id="btnHeroCadastro">
+                            <i class="bi bi-person-plus-fill me-1"></i> Cadastre-se Grátis
+                        </a>
+                    </div>
                 </div>
-                <div class="modal-body">
+                <div class="col-lg-4 d-none d-lg-block text-end">
+                    <div class="p-4 d-inline-block rounded-circle" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15);">
+                        <i class="bi bi-mortarboard-fill display-2 text-warning"></i>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção: Arquivo de Modelos / Meus Agendamentos (Cursos em que escolheu participar) -->
+        <section class="mb-5" id="secaoMeusAgendamentos">
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 section-header-line gap-2">
+                <div>
+                    <h2 class="h4 fw-bold mb-0" style="color: var(--brand-primary);" id="meus-agendamentos">📁 Arquivo de Inscrições & Meus Cursos</h2>
+                    <small class="text-muted">Consulte e gerencie todos os cursos e horários em que você escolheu participar como modelo</small>
+                </div>
+            </div>
+
+            <!-- Dashboard de Métricas de Participação do Modelo (Apenas para Logados) -->
+            <div class="row g-3 mb-4 d-none" id="metricasModelosWrapper">
+                <div class="col-6 col-md-3">
+                    <div class="metric-card-model">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <span class="text-muted small d-block">Total de Cursos</span>
+                                <h3 class="fw-bold text-primary mb-0 mt-1" id="metricaTotal">0</h3>
+                            </div>
+                            <div class="p-2 rounded-3 bg-primary-subtle text-primary fs-4"><i class="bi bi-collection-fill"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="metric-card-model">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <span class="text-muted small d-block">Confirmados</span>
+                                <h3 class="fw-bold text-success mb-0 mt-1" id="metricaConfirmados">0</h3>
+                            </div>
+                            <div class="p-2 rounded-3 bg-success-subtle text-success fs-4"><i class="bi bi-calendar-check-fill"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="metric-card-model">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <span class="text-muted small d-block">Concluídos</span>
+                                <h3 class="fw-bold text-info mb-0 mt-1" id="metricaConcluidos">0</h3>
+                            </div>
+                            <div class="p-2 rounded-3 bg-info-subtle text-info fs-4"><i class="bi bi-check-all"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="metric-card-model">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <span class="text-muted small d-block">Cancelados</span>
+                                <h3 class="fw-bold text-danger mb-0 mt-1" id="metricaCancelados">0</h3>
+                            </div>
+                            <div class="p-2 rounded-3 bg-danger-subtle text-danger fs-4"><i class="bi bi-x-circle-fill"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Barra de Filtros e Busca no Arquivo de Inscrições -->
+            <div class="row g-2 align-items-center mb-3 d-none" id="filtrosMeusAgendamentosWrapper">
+                <div class="col-12 col-md-6">
+                    <div class="d-flex flex-wrap gap-2" id="botoesFiltroAgendamento">
+                        <button type="button" class="btn btn-sm btn-senac-primary filter-btn-model active" data-filtro="todos">Todos</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary filter-btn-model" data-filtro="agendado">Confirmados</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary filter-btn-model" data-filtro="concluido">Concluídos</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary filter-btn-model" data-filtro="cancelado">Cancelados</button>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                        <input type="text" id="buscaMeusAgendamentos" class="form-control border-start-0 bg-white" placeholder="Filtrar por curso, data ou professor...">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lista de Agendamentos / Arquivo de Inscrições -->
+            <div id="listaMeusAgendamentos" class="row g-3">
+                <div class="col-12 text-center text-muted py-4">
+                    <div class="spinner-border spinner-border-sm text-primary mb-2" role="status"></div>
+                    <p class="small mb-0">A carregar os seus cursos agendados...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção: Vitrine de Cursos Disponíveis para Modelos (Pública & Logados) -->
+        <section>
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 section-header-line gap-2">
+                <div>
+                    <h2 class="h4 fw-bold mb-0" style="color: var(--brand-primary);" id="vitrine">✨ Cursos Disponíveis para Modelos</h2>
+                    <small class="text-muted">Escolha um procedimento prático gratuito e consulte os horários abertos</small>
+                </div>
+                <div class="col-12 col-sm-auto">
+                    <div class="input-group input-group-sm" style="max-width: 320px;">
+                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                        <input type="text" id="buscaCursosVitrine" class="form-control border-start-0 bg-white" placeholder="Buscar curso ou serviço...">
+                    </div>
+                </div>
+            </div>
+            
+            <div id="listaCursos" class="row g-4">
+                <div class="col-12 text-center text-muted py-5">
+                    <div class="spinner-border text-primary mb-2" role="status"></div>
+                    <p class="small mb-0">A carregar o catálogo de serviços práticos...</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal de Agendamento (Usuários Logados) -->
+    <div class="modal fade" id="modalAgendamento" tabindex="-1" aria-labelledby="modalCursoNome" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow-lg overflow-hidden">
+                <div class="modal-header border-bottom p-4" style="background: var(--brand-gradient); color: #FFFFFF;">
+                    <div>
+                        <span class="badge-senac-accent mb-1"><i class="bi bi-check-circle"></i> Confirmar Participação</span>
+                        <h5 class="modal-title fw-bold text-white mb-0" id="modalCursoNome">Escolher Horário</h5>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body p-4">
                     <p class="small text-muted mb-3" id="modalCursoDescricao"></p>
                     <div class="form-floating mb-3">
-                        <select class="form-select" id="selectHorarios">
+                        <select class="form-select" id="selectHorarios" aria-label="Horários Disponíveis">
                             <option value="" disabled selected>A procurar horários...</option>
                         </select>
                         <label for="selectHorarios">Horários Disponíveis</label>
                     </div>
-                    <div id="msgAgendamento" class="text-center small fw-bold mb-2"></div>
+                    <div id="msgAgendamento" class="text-center small fw-bold mb-2" aria-live="polite"></div>
                 </div>
-                <div class="modal-footer border-top-0 pt-0">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-brand" id="btnConfirmarAgendamento">Confirmar Presença</button>
+                <div class="modal-footer border-top-0 pt-0 px-4 pb-4">
+                    <button type="button" class="btn btn-senac-outline" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-senac-primary" id="btnConfirmarAgendamento">
+                        <i class="bi bi-check-circle me-1"></i> Confirmar Presença
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Exigência de Cadastro para Visitantes (Modo Visitante) -->
+    <div class="modal fade" id="modalExigirCadastro" tabindex="-1" aria-labelledby="modalExigirCadastroTitulo" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow-lg overflow-hidden">
+                <div class="modal-header border-bottom p-4" style="background: var(--brand-gradient); color: #FFFFFF;">
+                    <div>
+                        <span class="badge-senac-accent mb-1"><i class="bi bi-shield-lock-fill"></i> Cadastro Obrigatório</span>
+                        <h5 class="modal-title fw-bold text-white mb-0" id="modalExigirCadastroTitulo">Participe como Modelo no Senac</h5>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body p-4 text-center">
+                    <div class="p-3 bg-light rounded-circle d-inline-flex mb-3 text-warning fs-1">
+                        <i class="bi bi-person-bounding-box"></i>
+                    </div>
+                    <h4 class="h5 fw-bold text-dark mb-2">Cadastre-se para Garantir sua Vaga</h4>
+                    <p class="text-secondary small mb-4">
+                        Você selecionou o curso <strong id="nomeCursoExigirCadastro" class="text-primary"></strong>. Para participar como modelo voluntário e reservar seu horário de atendimento prático, você precisa ter uma conta gratuita no Connect Senac.
+                    </p>
+
+                    <div class="p-3 rounded-4 mb-4 text-start bg-light border">
+                        <div class="d-flex align-items-center gap-2 mb-2 small text-dark">
+                            <i class="bi bi-check-circle-fill text-success"></i>
+                            <span>Atendimento 100% gratuito e seguro.</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2 mb-2 small text-dark">
+                            <i class="bi bi-check-circle-fill text-success"></i>
+                            <span>Supervisionado por docentes especialistas Senac.</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2 small text-dark">
+                            <i class="bi bi-check-circle-fill text-success"></i>
+                            <span>Lembretes e confirmação imediata de presença.</span>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <a href="cadastro.html" class="btn btn-senac-primary py-3 shadow-sm">
+                            <i class="bi bi-person-plus-fill me-1"></i> Criar Cadastro Grátis
+                        </a>
+                        <a href="index.html" class="btn btn-senac-outline py-2">
+                            <i class="bi bi-box-arrow-in-right me-1"></i> Já Tenho Conta (Fazer Login)
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Modal de Feedback -->
-    <div class="modal fade" id="modalFeedback" tabindex="-1">
+    <div class="modal fade" id="modalFeedback" tabindex="-1" aria-labelledby="feedbackTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content rounded-4 border-0 shadow">
-                <div class="modal-header border-bottom-0 pb-0">
-                    <h5 class="modal-title fw-bold text-primary">⭐ Avaliar Serviço</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <div class="modal-content rounded-4 border-0 shadow-lg overflow-hidden">
+                <div class="modal-header border-bottom p-4" style="background: var(--brand-gradient); color: #FFFFFF;">
+                    <div>
+                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-1 mb-1">Experiência Prática</span>
+                        <h5 class="modal-title fw-bold text-white mb-0" id="feedbackTitle">⭐ Avaliar Atendimento</h5>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
                 </div>
-                <div class="modal-body">
-                    <p class="small text-muted mb-3">Como foi a sua experiência? A sua opinião ajuda os nossos alunos a evoluírem!</p>
+                <div class="modal-body p-4">
+                    <p class="small text-muted mb-3">A sua avaliação apoia o desenvolvimento técnico e pedagógico dos alunos Senac.</p>
 
-                    <form id="formFeedback">
+                    <form id="formFeedback" novalidate>
                         <input type="hidden" id="feedbackAgendamentoId">
 
                         <div class="mb-3">
-                            <label class="form-label fw-bold small">Nota (1 a 5 estrelas)</label>
+                            <label class="form-label fw-bold small text-secondary" for="feedbackNota">Nota de Atendimento</label>
                             <select class="form-select" id="feedbackNota" required>
                                 <option value="5">⭐⭐⭐⭐⭐ (5) - Excelente</option>
                                 <option value="4">⭐⭐⭐⭐ (4) - Muito Bom</option>
@@ -102,20 +368,29 @@
 
                         <div class="form-floating mb-3">
                             <textarea class="form-control" id="feedbackComentario" style="height: 100px" placeholder="Deixe um comentário"></textarea>
-                            <label for="feedbackComentario">Comentário (Opcional)</label>
+                            <label for="feedbackComentario">Comentário ou Sugestão (Opcional)</label>
                         </div>
 
-                        <div id="msgFeedback" class="text-center small fw-bold mb-2"></div>
+                        <div id="msgFeedback" class="text-center small fw-bold mb-2" aria-live="polite"></div>
 
-                        <button type="submit" class="btn btn-success w-100 fw-bold">Enviar Avaliação</button>
+                        <button type="submit" class="btn btn-senac-accent w-100 py-3 shadow-sm">
+                            <i class="bi bi-send me-1"></i> Enviar Avaliação
+                        </button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
-       
+
+    <!-- Rodapé -->
+    <footer class="bg-white border-top py-3 mt-auto">
+        <div class="container-fluid px-4 text-center text-muted small">
+            Connect Senac &copy; Plataforma de Gestão de Práticas Educacionais e Atendimento a Modelos.
+        </div>
+    </footer>
+        
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
     <script src="js/painel.js"></script>
 </body>
 </html>

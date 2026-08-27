@@ -1,0 +1,655 @@
+/* ==========================================================================
+   CONNECT SENAC - DESIGN SYSTEM & GLOBAL UI ENGINE
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+    /* --- Cores Institucionais Senac & Paleta Moderna --- */
+    --brand-primary: #004587;          /* Azul Institucional Senac */
+    --brand-primary-hover: #00366b;
+    --brand-primary-dark: #002244;
+    --brand-primary-light: #edf5fc;
+    
+    --brand-accent: #F47920;           /* Laranja Institucional Senac */
+    --brand-accent-hover: #dc6510;
+    --brand-accent-light: #fff5ed;
+    --brand-accent-glow: rgba(244, 121, 32, 0.25);
+
+    --brand-gradient: linear-gradient(135deg, #002244 0%, #004587 60%, #0a5cb0 100%);
+    --brand-gradient-accent: linear-gradient(135deg, #F47920 0%, #ff8f3d 100%);
+    --brand-gradient-hero: linear-gradient(135deg, #001f3f 0%, #004587 70%, #1e5fa0 100%);
+    
+    /* --- Superfícies & Neutros (WCAG 2.1 AA Compliant) --- */
+    --bg-canvas: #F8FAFC;              /* Slate 50 ultra limpo */
+    --surface-card: #FFFFFF;
+    --surface-glass: rgba(255, 255, 255, 0.94);
+    --surface-border: #E2E8F0;          /* Slate 200 */
+    --surface-border-subtle: #F1F5F9;
+    --surface-hover: #F8FAFC;
+    
+    /* --- Tipografia & Textos --- */
+    --text-primary: #0F172A;           /* Slate 900 */
+    --text-secondary: #475569;         /* Slate 600 */
+    --text-muted: #64748B;             /* Slate 500 */
+    --text-inverse: #FFFFFF;
+
+    /* --- Status Semântico --- */
+    --status-success: #10B981;
+    --status-success-bg: #ECFDF5;
+    --status-danger: #EF4444;
+    --status-danger-bg: #FEF2F2;
+    --status-warning: #F59E0B;
+    --status-warning-bg: #FFFBEB;
+    --status-info: #0284C7;
+    --status-info-bg: #F0F9FF;
+
+    /* --- Sombras & Profundidade --- */
+    --shadow-subtle: 0 1px 3px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.02);
+    --shadow-card: 0 4px 20px -2px rgba(0, 45, 89, 0.06), 0 2px 6px -1px rgba(0, 45, 89, 0.03);
+    --shadow-elevated: 0 20px 40px -10px rgba(0, 45, 89, 0.12), 0 8px 16px -4px rgba(0, 45, 89, 0.04);
+    --shadow-focus: 0 0 0 3px rgba(0, 69, 135, 0.2);
+    --shadow-focus-accent: 0 0 0 3px var(--brand-accent-glow);
+
+    /* --- Transições & Microinterações --- */
+    --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-smooth: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    --transition-spring: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+}
+
+/* ==========================================================================
+   RESET & TIPOGRAFIA GLOBAL
+   ========================================================================== */
+*, *::before, *::after {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: var(--bg-canvas);
+    color: var(--text-primary);
+    line-height: 1.6;
+    letter-spacing: -0.011em;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    color: var(--brand-primary);
+}
+
+/* ==========================================================================
+   TELA DE LOGIN FULL-SCREEN EXPANDIDA (SEM BORDAS OU ESPAÇO MORTO)
+   ========================================================================== */
+.auth-fullscreen-container {
+    min-height: 100vh;
+    width: 100vw;
+    display: flex;
+    overflow-x: hidden;
+    background-color: #FFFFFF;
+}
+
+.auth-panel-brand {
+    background: var(--brand-gradient-hero);
+    position: relative;
+    overflow: hidden;
+    color: #FFFFFF;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 3.5rem 3rem;
+    z-index: 1;
+}
+
+.auth-panel-brand::before {
+    content: '';
+    position: absolute;
+    top: -100px;
+    right: -100px;
+    width: 350px;
+    height: 350px;
+    background: radial-gradient(circle, rgba(244, 121, 32, 0.28) 0%, rgba(244, 121, 32, 0) 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.auth-panel-brand::after {
+    content: '';
+    position: absolute;
+    bottom: -80px;
+    left: -80px;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(10, 92, 176, 0.4) 0%, rgba(10, 92, 176, 0) 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.auth-panel-form {
+    background-color: #FFFFFF;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 3rem 2rem;
+    min-height: 100vh;
+}
+
+.auth-form-box {
+    width: 100%;
+    max-width: 440px;
+    animation: fadeInScale 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ==========================================================================
+   MICROINTERAÇÕES & EFEITOS DE CLIQUE (BOTÕES & LINKS)
+   ========================================================================== */
+
+.btn-senac-primary {
+    background: var(--brand-gradient);
+    color: #FFFFFF !important;
+    font-weight: 600;
+    border: none;
+    border-radius: var(--radius-md);
+    padding: 0.75rem 1.5rem;
+    box-shadow: 0 4px 14px rgba(0, 69, 135, 0.25);
+    transition: var(--transition-smooth);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+.btn-senac-primary:hover {
+    background: linear-gradient(135deg, #001f3f 0%, #00366b 50%, #004587 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 69, 135, 0.35);
+}
+
+.btn-senac-primary:active {
+    transform: scale(0.975);
+    box-shadow: 0 2px 8px rgba(0, 69, 135, 0.2);
+}
+
+.btn-senac-primary:focus-visible {
+    outline: none;
+    box-shadow: var(--shadow-focus);
+}
+
+.btn-senac-accent {
+    background: var(--brand-gradient-accent);
+    color: #FFFFFF !important;
+    font-weight: 700;
+    border: none;
+    border-radius: var(--radius-md);
+    padding: 0.75rem 1.5rem;
+    box-shadow: 0 4px 14px rgba(244, 121, 32, 0.3);
+    transition: var(--transition-smooth);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+.btn-senac-accent:hover {
+    background: linear-gradient(135deg, #dc6510 0%, #F47920 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(244, 121, 32, 0.4);
+    color: #FFFFFF !important;
+}
+
+.btn-senac-accent:active {
+    transform: scale(0.975);
+    box-shadow: 0 2px 8px rgba(244, 121, 32, 0.2);
+}
+
+.btn-senac-outline {
+    background: transparent;
+    color: var(--brand-primary);
+    font-weight: 600;
+    border: 1.5px solid var(--surface-border);
+    border-radius: var(--radius-md);
+    padding: 0.65rem 1.25rem;
+    transition: var(--transition-smooth);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.btn-senac-outline:hover {
+    background: var(--brand-primary-light);
+    border-color: var(--brand-primary);
+    color: var(--brand-primary);
+    transform: translateY(-1px);
+}
+
+.btn-senac-outline:active {
+    transform: scale(0.975);
+}
+
+.btn-action-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: var(--radius-sm);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--surface-border);
+    background: #FFFFFF;
+    color: var(--text-secondary);
+    transition: var(--transition-fast);
+    padding: 0;
+}
+
+.btn-action-icon:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-subtle);
+}
+
+.btn-action-icon:active {
+    transform: scale(0.92);
+}
+
+.btn-action-icon.btn-danger-hover:hover {
+    background-color: var(--status-danger-bg);
+    border-color: #FECACA;
+    color: var(--status-danger);
+}
+
+.btn-action-icon.btn-primary-hover:hover {
+    background-color: var(--brand-primary-light);
+    border-color: var(--brand-primary);
+    color: var(--brand-primary);
+}
+
+a.link-senac {
+    color: var(--brand-primary);
+    font-weight: 600;
+    text-decoration: none;
+    position: relative;
+    transition: var(--transition-fast);
+}
+
+a.link-senac::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: var(--brand-accent);
+    transition: width 0.25s ease;
+    border-radius: 2px;
+}
+
+a.link-senac:hover {
+    color: var(--brand-accent);
+}
+
+a.link-senac:hover::after {
+    width: 100%;
+}
+
+/* ==========================================================================
+   BENTO GRID & STATS CARDS (PAINEL ADMIN & COORDENADOR)
+   ========================================================================== */
+
+.bento-stat-card {
+    background: #FFFFFF;
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-lg);
+    padding: 1.35rem 1.5rem;
+    box-shadow: var(--shadow-card);
+    transition: var(--transition-smooth);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+}
+
+.bento-stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-elevated);
+    border-color: rgba(0, 69, 135, 0.25);
+}
+
+.bento-icon-wrapper {
+    width: 52px;
+    height: 52px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.bento-icon-primary {
+    background: var(--brand-primary-light);
+    color: var(--brand-primary);
+}
+
+.bento-icon-success {
+    background: var(--status-success-bg);
+    color: var(--status-success);
+}
+
+.bento-icon-accent {
+    background: var(--brand-accent-light);
+    color: var(--brand-accent);
+}
+
+.bento-icon-danger {
+    background: var(--status-danger-bg);
+    color: var(--status-danger);
+}
+
+/* ==========================================================================
+   SEGMENTED CONTROL TABS (ADMIN & COORDENAÇÃO)
+   ========================================================================== */
+
+.segmented-nav-tabs {
+    background: #FFFFFF;
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-lg);
+    padding: 0.4rem;
+    box-shadow: var(--shadow-subtle);
+    display: flex;
+    gap: 0.4rem;
+    overflow-x: auto;
+}
+
+.segmented-nav-tabs .nav-link {
+    border: none;
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.9rem;
+    padding: 0.65rem 1.25rem;
+    transition: var(--transition-smooth);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+    background: transparent;
+}
+
+.segmented-nav-tabs .nav-link:hover:not(.active) {
+    background: var(--surface-hover);
+    color: var(--brand-primary);
+}
+
+.segmented-nav-tabs .nav-link.active {
+    background: var(--brand-primary);
+    color: #FFFFFF !important;
+    box-shadow: 0 4px 12px rgba(0, 69, 135, 0.25);
+}
+
+.segmented-nav-tabs .nav-link:active {
+    transform: scale(0.97);
+}
+
+/* ==========================================================================
+   CARDS DE CONTEÚDO & FORMULÁRIOS
+   ========================================================================== */
+
+.content-card {
+    background: #FFFFFF;
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+}
+
+.content-card-header {
+    background: #FFFFFF;
+    border-bottom: 1px solid var(--surface-border);
+    padding: 1.25rem 1.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.content-card-body {
+    padding: 1.75rem;
+}
+
+/* ==========================================================================
+   TABELAS MODERNAS & RESPONSIVAS
+   ========================================================================== */
+
+.table-modern {
+    margin-bottom: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+}
+
+.table-modern thead th {
+    background: #F8FAFC;
+    color: var(--text-muted);
+    font-weight: 700;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 1rem 1.25rem;
+    border-top: 1px solid var(--surface-border);
+    border-bottom: 1px solid var(--surface-border);
+}
+
+.table-modern tbody tr {
+    transition: var(--transition-fast);
+}
+
+.table-modern tbody tr:hover {
+    background-color: var(--brand-primary-light);
+}
+
+.table-modern tbody td {
+    padding: 1rem 1.25rem;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--surface-border-subtle);
+    font-size: 0.9rem;
+}
+
+/* ==========================================================================
+   NAVBAR & HEADER GLOBAL
+   ========================================================================== */
+
+.navbar-senac {
+    background: var(--brand-primary);
+    box-shadow: 0 4px 20px rgba(0, 34, 68, 0.2);
+    border-bottom: 2px solid var(--brand-accent);
+}
+
+.navbar-brand-badge {
+    background: rgba(244, 121, 32, 0.2);
+    color: #FFFFFF;
+    border: 1px solid rgba(244, 121, 32, 0.4);
+    font-weight: 700;
+    font-size: 0.75rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    letter-spacing: 0.03em;
+}
+
+/* ==========================================================================
+   FORMULÁRIOS (FLOATING LABELS & FOCUS RINGS)
+   ========================================================================== */
+
+.form-floating > .form-control,
+.form-floating > .form-select {
+    height: calc(3.5rem + 2px);
+    border: 1.5px solid var(--surface-border);
+    border-radius: var(--radius-md);
+    background-color: #FFFFFF;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    padding-top: 1.625rem;
+    padding-bottom: 0.625rem;
+    transition: var(--transition-smooth);
+}
+
+.form-floating > .form-control:focus,
+.form-floating > .form-select:focus {
+    border-color: var(--brand-primary);
+    box-shadow: var(--shadow-focus);
+    background-color: #FFFFFF;
+}
+
+.form-floating > label {
+    color: var(--text-muted);
+    font-weight: 500;
+    padding: 1rem 1rem;
+    transition: var(--transition-fast);
+}
+
+.form-floating > .form-control:focus ~ label,
+.form-floating > .form-control:not(:placeholder-shown) ~ label {
+    color: var(--brand-primary);
+    font-weight: 600;
+    opacity: 0.95;
+    transform: scale(0.82) translateY(-0.6rem) translateX(0.15rem);
+}
+
+.password-toggle-wrapper {
+    position: relative;
+}
+
+.password-toggle-btn {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    padding: 8px;
+    cursor: pointer;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition-fast);
+    z-index: 5;
+}
+
+.password-toggle-btn:hover {
+    color: var(--brand-primary);
+    background-color: var(--surface-hover);
+}
+
+.password-toggle-btn:active {
+    transform: translateY(-50%) scale(0.9);
+}
+
+/* ==========================================================================
+   ALERTS, TOASTS & BADGES
+   ========================================================================== */
+
+.alert-custom {
+    border-radius: var(--radius-md);
+    padding: 0.85rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    border: 1px solid transparent;
+}
+
+.alert-custom-danger {
+    background-color: var(--status-danger-bg);
+    color: #B91C1C;
+    border-color: #FECACA;
+}
+
+.alert-custom-success {
+    background-color: var(--status-success-bg);
+    color: #065F46;
+    border-color: #A7F3D0;
+}
+
+.badge-senac-accent {
+    background: var(--brand-accent-light);
+    color: var(--brand-accent);
+    border: 1px solid rgba(244, 121, 32, 0.2);
+    font-weight: 700;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.badge-senac-primary {
+    background: var(--brand-primary-light);
+    color: var(--brand-primary);
+    border: 1px solid rgba(0, 69, 135, 0.15);
+    font-weight: 700;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+/* ==========================================================================
+   ANIMAÇÕES CSS
+   ========================================================================== */
+
+@keyframes fadeInScale {
+    0% {
+        opacity: 0;
+        transform: scale(0.97) translateY(8px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes slideDown {
+    0% {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
