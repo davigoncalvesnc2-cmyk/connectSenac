@@ -96,18 +96,24 @@ exports.login = async (req, res) => {
         }
 
         if (!utilizador) {
-            return res.status(404).json({ erro: 'Utilizador não encontrado. Verifique as suas credenciais.' });
+            return res.status(401).json({ 
+                erro: 'E-mail ou palavra-passe incorretos.',
+                esqueceuSenha: true 
+            });
         }
 
         // [Funcionalidade 2.2] Verificar se o utilizador está bloqueado pela administração
         if (utilizador.is_bloqueado) {
-            return res.status(403).json({ erro: 'A sua conta está temporariamente suspensa. Contacte a coordenação.' });
+            return res.status(403).json({ erro: 'A sua conta está temporariamente suspensa pela administração. Contacte a coordenação.' });
         }
 
         // Comparar a palavra-passe digitada com o Hash do banco
         const senhaValida = await bcrypt.compare(senha, utilizador.senha);
         if (!senhaValida) {
-            return res.status(401).json({ erro: 'Palavra-passe incorreta.' });
+            return res.status(401).json({ 
+                erro: 'E-mail ou palavra-passe incorretos.',
+                esqueceuSenha: true 
+            });
         }
 
         // Gerar o Token de Autenticação (JWT)

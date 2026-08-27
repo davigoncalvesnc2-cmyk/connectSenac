@@ -41,8 +41,6 @@ app.get('/api/status', (req, res) => {
 require('./backend/cron/notificador');
 
 // Agrupamento de Rotas da API REST
-app.use('/api/usuarios/login', authLimiter);
-app.use('/api/usuarios/esqueci-senha', authLimiter);
 app.use('/api/usuarios', usuarioRoutes);
 app.use('/api/cursos', cursoRoutes); 
 app.use('/api/disponibilidades', disponibilidadeRoutes); 

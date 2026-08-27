@@ -83,11 +83,20 @@ if (formLogin) {
                 window.location.href = redirecionarPorPerfil(perfil);
             } else {
                 if (msgErro) {
-                    const msg = data.erro || 'Falha ao autenticar. Verifique o seu e-mail e senha.';
-                    if (textoErro) {
-                        textoErro.textContent = msg;
+                    const msg = data.erro || 'E-mail ou palavra-passe incorretos.';
+                    if (data.esqueceuSenha || response.status === 401 || response.status === 404) {
+                        const conteudo = `<span>${msg} <a href="esqueciSenha.html" class="link-senac fw-bold text-decoration-underline d-inline-block mt-1">Esqueceu a palavra-passe? Clique aqui para recuperar.</a></span>`;
+                        if (textoErro) {
+                            textoErro.innerHTML = conteudo;
+                        } else {
+                            msgErro.innerHTML = `<i class="bi bi-info-circle-fill flex-shrink-0"></i> ${conteudo}`;
+                        }
                     } else {
-                        msgErro.textContent = msg;
+                        if (textoErro) {
+                            textoErro.textContent = msg;
+                        } else {
+                            msgErro.textContent = msg;
+                        }
                     }
                     msgErro.classList.remove('d-none');
                 }
